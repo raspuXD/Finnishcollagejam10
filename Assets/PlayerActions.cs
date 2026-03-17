@@ -93,13 +93,13 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             ""id"": ""4d0f4bfd-a61a-4943-96c3-a97d47b36be9"",
             ""actions"": [
                 {
-                    ""name"": ""WASD"",
-                    ""type"": ""Button"",
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
                     ""id"": ""0cb320b1-e743-4e8e-8320-76cf403368fa"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Sprint"",
@@ -120,9 +120,18 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Polarity"",
+                    ""name"": ""Attract"",
                     ""type"": ""Button"",
                     ""id"": ""16f70c43-c3c7-410d-82e5-0677e29f9d27"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Repel"",
+                    ""type"": ""Button"",
+                    ""id"": ""bacca9fc-905a-44ad-a431-059f5be3cef2"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -142,48 +151,59 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""af178055-4e47-4e44-806c-55ecb18bcfdd"",
+                    ""name"": ""2D Vector"",
+                    ""id"": ""07e10066-5b60-4ec2-b886-3c89d871caea"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""2913ea94-e7e6-4a0e-a053-8199c4bb48fc"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""WASD"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""1c2cb550-b8fb-4b4a-9349-d3bd0c0294cf"",
+                    ""name"": ""down"",
+                    ""id"": ""637f8061-4ba0-4987-b8c3-eaf55548b818"",
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""WASD"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""a563289e-ff3e-48da-8843-45e9a6a1605a"",
+                    ""name"": ""left"",
+                    ""id"": ""004f6b17-6281-4ffe-a598-f8fc92598259"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""WASD"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""090bdc50-8367-4099-882b-f4d3adfe29b6"",
+                    ""name"": ""right"",
+                    ""id"": ""d3889924-ff51-4fea-9e4f-05a97a8025aa"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""WASD"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": false
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
@@ -203,18 +223,18 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Polarity"",
+                    ""action"": ""Attract"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""24980ed1-1e25-4573-8f6f-d7734fdda7f0"",
+                    ""id"": ""90b293e9-f925-44c8-9bdc-bb5424a2d7fb"",
                     ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Polarity"",
+                    ""action"": ""Repel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -225,10 +245,11 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
 }");
         // Movement
         m_Movement = asset.FindActionMap("Movement", throwIfNotFound: true);
-        m_Movement_WASD = m_Movement.FindAction("WASD", throwIfNotFound: true);
+        m_Movement_Move = m_Movement.FindAction("Move", throwIfNotFound: true);
         m_Movement_Sprint = m_Movement.FindAction("Sprint", throwIfNotFound: true);
         m_Movement_Jump = m_Movement.FindAction("Jump", throwIfNotFound: true);
-        m_Movement_Polarity = m_Movement.FindAction("Polarity", throwIfNotFound: true);
+        m_Movement_Attract = m_Movement.FindAction("Attract", throwIfNotFound: true);
+        m_Movement_Repel = m_Movement.FindAction("Repel", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -309,10 +330,11 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     // Movement
     private readonly InputActionMap m_Movement;
     private List<IMovementActions> m_MovementActionsCallbackInterfaces = new List<IMovementActions>();
-    private readonly InputAction m_Movement_WASD;
+    private readonly InputAction m_Movement_Move;
     private readonly InputAction m_Movement_Sprint;
     private readonly InputAction m_Movement_Jump;
-    private readonly InputAction m_Movement_Polarity;
+    private readonly InputAction m_Movement_Attract;
+    private readonly InputAction m_Movement_Repel;
     /// <summary>
     /// Provides access to input actions defined in input action map "Movement".
     /// </summary>
@@ -325,9 +347,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// </summary>
         public MovementActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "Movement/WASD".
+        /// Provides access to the underlying input action "Movement/Move".
         /// </summary>
-        public InputAction @WASD => m_Wrapper.m_Movement_WASD;
+        public InputAction @Move => m_Wrapper.m_Movement_Move;
         /// <summary>
         /// Provides access to the underlying input action "Movement/Sprint".
         /// </summary>
@@ -337,9 +359,13 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_Movement_Jump;
         /// <summary>
-        /// Provides access to the underlying input action "Movement/Polarity".
+        /// Provides access to the underlying input action "Movement/Attract".
         /// </summary>
-        public InputAction @Polarity => m_Wrapper.m_Movement_Polarity;
+        public InputAction @Attract => m_Wrapper.m_Movement_Attract;
+        /// <summary>
+        /// Provides access to the underlying input action "Movement/Repel".
+        /// </summary>
+        public InputAction @Repel => m_Wrapper.m_Movement_Repel;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -366,18 +392,21 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_MovementActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_MovementActionsCallbackInterfaces.Add(instance);
-            @WASD.started += instance.OnWASD;
-            @WASD.performed += instance.OnWASD;
-            @WASD.canceled += instance.OnWASD;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
-            @Polarity.started += instance.OnPolarity;
-            @Polarity.performed += instance.OnPolarity;
-            @Polarity.canceled += instance.OnPolarity;
+            @Attract.started += instance.OnAttract;
+            @Attract.performed += instance.OnAttract;
+            @Attract.canceled += instance.OnAttract;
+            @Repel.started += instance.OnRepel;
+            @Repel.performed += instance.OnRepel;
+            @Repel.canceled += instance.OnRepel;
         }
 
         /// <summary>
@@ -389,18 +418,21 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="MovementActions" />
         private void UnregisterCallbacks(IMovementActions instance)
         {
-            @WASD.started -= instance.OnWASD;
-            @WASD.performed -= instance.OnWASD;
-            @WASD.canceled -= instance.OnWASD;
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
-            @Polarity.started -= instance.OnPolarity;
-            @Polarity.performed -= instance.OnPolarity;
-            @Polarity.canceled -= instance.OnPolarity;
+            @Attract.started -= instance.OnAttract;
+            @Attract.performed -= instance.OnAttract;
+            @Attract.canceled -= instance.OnAttract;
+            @Repel.started -= instance.OnRepel;
+            @Repel.performed -= instance.OnRepel;
+            @Repel.canceled -= instance.OnRepel;
         }
 
         /// <summary>
@@ -442,12 +474,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     public interface IMovementActions
     {
         /// <summary>
-        /// Method invoked when associated input action "WASD" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Move" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnWASD(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
@@ -463,11 +495,18 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Polarity" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Attract" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnPolarity(InputAction.CallbackContext context);
+        void OnAttract(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Repel" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRepel(InputAction.CallbackContext context);
     }
 }
