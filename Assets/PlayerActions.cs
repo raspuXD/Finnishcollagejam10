@@ -136,6 +136,15 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Magnet"",
+                    ""type"": ""Button"",
+                    ""id"": ""bd3ff608-596d-4676-9a48-2d6a0d7517f6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -237,6 +246,17 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""Repel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a9cf58be-e23d-4778-8a38-1f622c1c6b16"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Magnet"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -250,6 +270,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Movement_Jump = m_Movement.FindAction("Jump", throwIfNotFound: true);
         m_Movement_Attract = m_Movement.FindAction("Attract", throwIfNotFound: true);
         m_Movement_Repel = m_Movement.FindAction("Repel", throwIfNotFound: true);
+        m_Movement_Magnet = m_Movement.FindAction("Magnet", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -335,6 +356,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Movement_Jump;
     private readonly InputAction m_Movement_Attract;
     private readonly InputAction m_Movement_Repel;
+    private readonly InputAction m_Movement_Magnet;
     /// <summary>
     /// Provides access to input actions defined in input action map "Movement".
     /// </summary>
@@ -366,6 +388,10 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Movement/Repel".
         /// </summary>
         public InputAction @Repel => m_Wrapper.m_Movement_Repel;
+        /// <summary>
+        /// Provides access to the underlying input action "Movement/Magnet".
+        /// </summary>
+        public InputAction @Magnet => m_Wrapper.m_Movement_Magnet;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -407,6 +433,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Repel.started += instance.OnRepel;
             @Repel.performed += instance.OnRepel;
             @Repel.canceled += instance.OnRepel;
+            @Magnet.started += instance.OnMagnet;
+            @Magnet.performed += instance.OnMagnet;
+            @Magnet.canceled += instance.OnMagnet;
         }
 
         /// <summary>
@@ -433,6 +462,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Repel.started -= instance.OnRepel;
             @Repel.performed -= instance.OnRepel;
             @Repel.canceled -= instance.OnRepel;
+            @Magnet.started -= instance.OnMagnet;
+            @Magnet.performed -= instance.OnMagnet;
+            @Magnet.canceled -= instance.OnMagnet;
         }
 
         /// <summary>
@@ -508,5 +540,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRepel(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Magnet" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMagnet(InputAction.CallbackContext context);
     }
 }

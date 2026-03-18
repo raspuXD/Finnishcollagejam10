@@ -11,8 +11,10 @@ public class MagnetController : MonoBehaviour
     public float repelBoost = 12f;
     public float snapDistance = 3f;
 
-    public enum Polarity { Attract, Repel }
-    public Polarity currentPolarity = Polarity.Attract;
+    public MagnetPolarity currentPolarity = MagnetPolarity.Attract;
+
+    public enum Enabled { ON, OFF }
+    public Enabled currentEnabled = Enabled.OFF;
 
     private Rigidbody rb;
     private PlayerController playerController;
@@ -25,6 +27,14 @@ public class MagnetController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (currentEnabled == Enabled.OFF)
+        {
+            if (playerController != null)
+                playerController.controlMultiplier = 1f;
+
+            return;
+        }
+
         ApplyMagnetism();
     }
 
@@ -42,7 +52,6 @@ public class MagnetController : MonoBehaviour
             Rigidbody targetRb = metal.rb;
             if (targetRb == null) continue;
 
-            // Direction to object center
             Vector3 toCenter = hit.transform.position - transform.position;
             float distance = toCenter.magnitude;
 
@@ -50,61 +59,45 @@ public class MagnetController : MonoBehaviour
 
             Vector3 dir = toCenter.normalized;
 
-            // 🔥 Clean direction logic (FIXED)
-            Vector3 forceDir = currentPolarity == Polarity.Attract ? dir : -dir;
+            // 🔥 Polarity interaction
+            bool attract = currentPolarity != metal.polarity;
+            Vector3 forceDir = attract ? dir : -dir;
 
             float targetStrength = metal.magneticStrength;
 
-            // Smooth falloff
             float distance01 = Mathf.Clamp01(distance / range);
             float falloff = 1f - distance01;
             falloff *= falloff;
 
-            float force = baseForce * falloff;
+            float force = baseForce * falloff + 10f;
 
-            // Constant pull (no dead zone)
-            force += 10f;
+            float strengthRatio = Mathf.Clamp(magneticStrength / targetStrength, 0.2f, 3f);
+            float playerRatio = Mathf.Clamp(targetStrength / magneticStrength, 0.5f, 3f);
 
-            // 🔥 Strength scaling (mass-like)
-            float strengthRatio = magneticStrength / targetStrength;
-            strengthRatio = Mathf.Clamp(strengthRatio, 0.2f, 3f);
-
-            float playerRatio = targetStrength / magneticStrength;
-            playerRatio = Mathf.Clamp(playerRatio, 0.5f, 3f);
-
-            // 🔥 ORIGINAL "who moves" logic (preserved)
             if (targetStrength < magneticStrength)
             {
-                // Object moves (opposite direction)
                 targetRb.AddForce(-forceDir * force * strengthRatio, ForceMode.Acceleration);
             }
             else
             {
-                // Player moves
                 rb.AddForce(forceDir * force * playerRatio, ForceMode.Acceleration);
-
-                // Flying feel
                 rb.linearVelocity += forceDir * (force * 0.02f * playerRatio);
 
                 magnetActive = true;
 
-                // Snap when close
                 if (distance < snapDistance)
                 {
                     rb.AddForce(forceDir * force * 3f * playerRatio, ForceMode.Acceleration);
                     rb.linearVelocity += forceDir * 5f * playerRatio;
                 }
 
-                // Repel boost
-                if (currentPolarity == Polarity.Repel && distance < 4f)
+                if (!attract && distance < 4f)
                 {
-                    float boost = repelBoost * playerRatio;
-                    rb.linearVelocity += forceDir * boost;
+                    rb.linearVelocity += forceDir * (repelBoost * playerRatio);
                 }
             }
         }
 
-        // Reduce control while magnet active
         if (playerController != null)
         {
             playerController.controlMultiplier = magnetActive ? 0.5f : 1f;
@@ -113,11 +106,13 @@ public class MagnetController : MonoBehaviour
 
     public void OnAttract()
     {
-        currentPolarity = Polarity.Attract;
+        currentPolarity = MagnetPolarity.Attract;
+        currentEnabled = Enabled.ON;
     }
 
     public void OnRepel()
     {
-        currentPolarity = Polarity.Repel;
+        currentPolarity = MagnetPolarity.Repel;
+        currentEnabled = Enabled.ON;
     }
 }
