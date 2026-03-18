@@ -11,18 +11,25 @@ public class PlayerController : MonoBehaviour
 
     [HideInInspector] public float controlMultiplier = 1f;
 
+    public Transform cameraTransform;
+
+    
+
     private Vector2 moveInput;
     private Rigidbody rb;
 
     void Awake()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        
         rb = GetComponent<Rigidbody>();
+
+        if (cameraTransform == null)
+            cameraTransform = Camera.main.transform;
+
         rb.linearDamping = drag;
-        rb.linearDamping = 1f;
         rb.angularDamping = 0.5f;
     }
-
-    
 
     void FixedUpdate()
     {
@@ -34,7 +41,19 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
+        // Get camera directions
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right = cameraTransform.right;
+
+        // Flatten them
+        forward.y = 0;
+        right.y = 0;
+
+        forward.Normalize();
+        right.Normalize();
+
+        // Camera-relative movement
+        Vector3 move = forward * moveInput.y + right * moveInput.x;
 
         Vector3 targetVelocity = move * moveSpeed;
         Vector3 velocity = rb.linearVelocity;
