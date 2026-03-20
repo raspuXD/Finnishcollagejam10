@@ -11,11 +11,17 @@ public class MagnetController : MonoBehaviour
     public float repelBoost = 12f;
     public float snapDistance = 3f;
 
+    [Header("Polarity Switch Settings")]
+    public float switchCooldown = 0.25f; // time between allowed switches
+
+    private float lastSwitchTime = -999f;
+
     public MagnetPolarity currentPolarity = MagnetPolarity.Attract;
 
     public enum Enabled { ON, OFF }
     public Enabled currentEnabled = Enabled.OFF;
 
+    public Animator animator;
     private Rigidbody rb;
     private PlayerController playerController;
 
@@ -36,6 +42,20 @@ public class MagnetController : MonoBehaviour
         }
 
         ApplyMagnetism();
+    }
+
+    bool CanSwitch()
+    {
+        return Time.time >= lastSwitchTime + switchCooldown;
+    }
+
+    void RegisterSwitch()
+    {
+        lastSwitchTime = Time.time;
+
+        // Optional: clear triggers to avoid stacking issues
+        animator.ResetTrigger("ToAttract");
+        animator.ResetTrigger("ToRepel");
     }
 
     void ApplyMagnetism()
@@ -59,7 +79,6 @@ public class MagnetController : MonoBehaviour
 
             Vector3 dir = toCenter.normalized;
 
-            // 🔥 Polarity interaction
             bool attract = currentPolarity != metal.polarity;
             Vector3 forceDir = attract ? dir : -dir;
 
@@ -106,13 +125,27 @@ public class MagnetController : MonoBehaviour
 
     public void OnAttract()
     {
+        if (!CanSwitch() || currentPolarity == MagnetPolarity.Attract)
+            return;
+
+        RegisterSwitch();
+
         currentPolarity = MagnetPolarity.Attract;
         currentEnabled = Enabled.ON;
+
+        animator.SetTrigger("ToAttract");
     }
 
     public void OnRepel()
     {
+        if (!CanSwitch() || currentPolarity == MagnetPolarity.Repel)
+            return;
+
+        RegisterSwitch();
+
         currentPolarity = MagnetPolarity.Repel;
         currentEnabled = Enabled.ON;
+
+        animator.SetTrigger("ToRepel");
     }
 }
