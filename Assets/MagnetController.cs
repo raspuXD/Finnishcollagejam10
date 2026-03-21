@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections;
 public class MagnetController : MonoBehaviour
 {
     [Header("Magnet Settings")]
@@ -24,6 +24,14 @@ public class MagnetController : MonoBehaviour
     public Animator animator;
     private Rigidbody rb;
     private PlayerController playerController;
+
+    [Header("Visuals")]
+    public Renderer targetRenderer;
+    public Gradient attractGradient;
+    public Gradient repelGradient;
+    public float colorTransitionTime = 0.3f;
+
+    private Coroutine colorRoutine;
 
     void Awake()
     {
@@ -123,9 +131,9 @@ public class MagnetController : MonoBehaviour
         }
     }
 
-    public void OnAttract()
+   public void OnAttract()
     {
-        if (!CanSwitch() || currentPolarity == MagnetPolarity.Attract)
+        if (!CanSwitch())
             return;
 
         RegisterSwitch();
@@ -134,11 +142,33 @@ public class MagnetController : MonoBehaviour
         currentEnabled = Enabled.ON;
 
         animator.SetTrigger("ToAttract");
-    }
 
+        if (colorRoutine != null)
+            StopCoroutine(colorRoutine);
+
+        colorRoutine = StartCoroutine(AnimateColor(attractGradient));
+    }
+    IEnumerator AnimateColor(Gradient gradient)
+    {
+        float time = 0f;
+
+        while (time < colorTransitionTime)
+        {
+            float t = time / colorTransitionTime;
+
+            Color col = gradient.Evaluate(t);
+            targetRenderer.material.color = col;
+
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // ensure final color
+        targetRenderer.material.color = gradient.Evaluate(1f);
+    }
     public void OnRepel()
     {
-        if (!CanSwitch() || currentPolarity == MagnetPolarity.Repel)
+        if (!CanSwitch())
             return;
 
         RegisterSwitch();
@@ -147,5 +177,10 @@ public class MagnetController : MonoBehaviour
         currentEnabled = Enabled.ON;
 
         animator.SetTrigger("ToRepel");
+
+        if (colorRoutine != null)
+            StopCoroutine(colorRoutine);
+
+        colorRoutine = StartCoroutine(AnimateColor(repelGradient));
     }
 }
