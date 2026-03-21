@@ -2,6 +2,15 @@ using UnityEngine;
 
 public class MetalObject : MonoBehaviour
 {
+    public enum ObjectType
+    {
+        Prop,
+        Enemy
+    }
+
+    [Header("Type")]
+    public ObjectType objectType = ObjectType.Prop;
+
     [Header("Magnet Settings")]
     public float magneticStrength = 1000f;
     public float range = 10f;
@@ -30,8 +39,7 @@ public class MetalObject : MonoBehaviour
             if (hit.gameObject == gameObject) continue;
 
             MetalObject other = hit.GetComponent<MetalObject>();
-            if (other == null) continue;
-            if (other.rb == null) continue;
+            if (other == null || other.rb == null) continue;
 
             Vector3 toOther = other.transform.position - transform.position;
             float distance = toOther.magnitude;
@@ -40,17 +48,9 @@ public class MetalObject : MonoBehaviour
 
             Vector3 dir = toOther.normalized;
 
-            //  NEW: polarity toggle logic
-            bool attract;
-
-            if (usePolarity && other.usePolarity)
-            {
-                attract = polarity != other.polarity;
-            }
-            else
-            {
-                attract = true; // neutral = always attract
-            }
+            bool attract = (usePolarity && other.usePolarity)
+                ? polarity != other.polarity
+                : true;
 
             Vector3 forceDir = attract ? dir : -dir;
 
