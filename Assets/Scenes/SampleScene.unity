@@ -1243,10 +1243,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60fd1c9a531529141acba9b48da5fa65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ImpactDamage
-  damageMultiplier: 2
-  minImpactVelocity: 3
+  baseDamageMultiplier: 2
   maxDamage: 50
   hitCooldown: 0.1
+  tagSettings: []
 --- !u!114 &625499487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1310,6 +1310,95 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &916260193
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3081783002070091653, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_Name
+      value: SmallEnemy_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4930809737743044181, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: maxHealth
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 16.92
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: maxDamage
+      value: 1000000
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: damageMultiplier
+      value: 1.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: minImpactVelocity
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[0].tag
+      value: Wall
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[0].minVelocity
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[0].damageMultiplier
+      value: 1.5
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
 --- !u!1 &1022146721
 GameObject:
   m_ObjectHideFlags: 0
@@ -1935,6 +2024,10 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: magneticStrength
+      value: 501
+      objectReference: {fileID: 0}
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 14.43
@@ -1986,6 +2079,22 @@ PrefabInstance:
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: minImpactVelocity
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[0].tag
+      value: Floor
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[0].minVelocity
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[0].damageMultiplier
+      value: 1.25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2420,6 +2529,7 @@ SceneRoots:
   - {fileID: 441586641}
   - {fileID: 281332731}
   - {fileID: 387911705512734221}
+  - {fileID: 916260193}
   - {fileID: 1108525751}
   - {fileID: 148841342}
   - {fileID: 5740807261132676983}

@@ -1,14 +1,27 @@
 using UnityEngine;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class TagImpactSettings
+{
+    public string tag;
+    public float minVelocity = 3f;
+    public float damageMultiplier = 1f;
+}
 
 public class ImpactDamage : MonoBehaviour
 {
-    public float damageMultiplier = 2f;
-    public float minImpactVelocity = 3f;
+    [Header("Global Damage Settings")]
+    public float baseDamageMultiplier = 2f;
     public float maxDamage = 50f;
     public float hitCooldown = 0.1f;
 
+    [Header("Tag-Based Settings")]
+    public List<TagImpactSettings> tagSettings = new List<TagImpactSettings>();
+
     private float lastHitTime;
     private Vector3 lastVelocity;
+
     private Rigidbody rb;
     private MetalObject magnetObject;
 
@@ -23,6 +36,16 @@ public class ImpactDamage : MonoBehaviour
         lastVelocity = rb.linearVelocity;
     }
 
+    TagImpactSettings GetTagSettings(string tag)
+    {
+        foreach (var setting in tagSettings)
+        {
+            if (setting.tag == tag)
+                return setting;
+        }
+        return null;
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (Time.time < lastHitTime + hitCooldown)
@@ -32,26 +55,27 @@ public class ImpactDamage : MonoBehaviour
         float relativeVelocity = collision.relativeVelocity.magnitude;
         float velocityLoss = velocityBefore - relativeVelocity;
 
-        float damage = velocityLoss * damageMultiplier;
+        TagImpactSettings tagSetting = GetTagSettings(collision.collider.tag);
+
+        float minVelocity = tagSetting != null ? tagSetting.minVelocity : 0f;
+        float tagMultiplier = tagSetting != null ? tagSetting.damageMultiplier : 1f;
+
+        float damage = velocityLoss * baseDamageMultiplier * tagMultiplier;
         damage = Mathf.Clamp(damage, 0f, maxDamage);
 
         // -------------------------
-        // PROP → STRICT FILTER (clean hits only)
+        // PROP → STRICT FILTER
         // -------------------------
         if (magnetObject != null && magnetObject.objectType == MetalObject.ObjectType.Prop)
         {
-            if (velocityLoss < minImpactVelocity)
-                return;
-
-            if (relativeVelocity < minImpactVelocity)
-                return;
+            if (velocityLoss < minVelocity) return;
+            if (relativeVelocity < minVelocity) return;
 
             ContactPoint contact = collision.contacts[0];
             Vector3 normal = contact.normal;
 
             float alignment = Vector3.Dot(lastVelocity.normalized, -normal);
-            if (alignment < 0.5f)
-                return;
+            if (alignment < 0.5f) return;
 
             EnemyHealth enemy = collision.collider.GetComponent<EnemyHealth>();
             if (enemy != null)
@@ -65,39 +89,18 @@ public class ImpactDamage : MonoBehaviour
         }
 
         // -------------------------
-        // ENEMY → LOOSE FILTER (for wall slams)
+        // ENEMY → LOOSE FILTER
         // -------------------------
         if (magnetObject != null && magnetObject.objectType == MetalObject.ObjectType.Enemy)
         {
-            // Ignore player (handled elsewhere)
             if (collision.collider.GetComponent<PlayerHealth>() != null)
                 return;
 
             float enemyVelocity = lastVelocity.magnitude;
-
-            if (enemyVelocity < minImpactVelocity)
+            if (enemyVelocity < minVelocity)
                 return;
 
-
-            // -------------------------
-            // CHECK WHAT WE HIT
-            // -------------------------
-
-            bool hitWall = collision.collider.CompareTag("Wall");
-            bool hitFloor = collision.collider.CompareTag("Floor");
-
-            // Optional: if you ONLY want wall damage
-            if (hitFloor)
-                return;
-
-
-            float enemyDamage = enemyVelocity * damageMultiplier * 0.5f;
-
-            // Optional bonus for walls
-            if (hitWall)
-            {
-                enemyDamage *= 1.5f;
-            }
+            float enemyDamage = enemyVelocity * baseDamageMultiplier * tagMultiplier * 0.5f;
 
             enemyDamage = Mathf.Clamp(enemyDamage, 0f, maxDamage);
 
