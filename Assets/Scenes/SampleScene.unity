@@ -401,6 +401,9 @@ MonoBehaviour:
   objectType: 0
   magneticStrength: 100
   range: 10
+  baseForce: 20
+  strengthInfluence: 0.002
+  falloffPower: 2
   usePolarity: 1
   polarity: 0
   rb: {fileID: 0}
@@ -518,7 +521,7 @@ Transform:
   m_GameObject: {fileID: 281332725}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 16.38, y: 0.94, z: -14.63}
+  m_LocalPosition: {x: 32.6, y: 0.94, z: 26.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1094,6 +1097,9 @@ MonoBehaviour:
   objectType: 1
   magneticStrength: 600
   range: 10
+  baseForce: 20
+  strengthInfluence: 0.002
+  falloffPower: 2
   usePolarity: 0
   polarity: 1
   rb: {fileID: 0}
@@ -1326,9 +1332,21 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: baseForce
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: falloffPower
+      value: 0.88
+      objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: magneticStrength
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 16.92
+      value: 16.82
       objectReference: {fileID: 0}
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1336,7 +1354,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.29
+      value: -13.27
       objectReference: {fileID: 0}
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1366,6 +1384,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7921652071803561034, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_Mass
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: maxDamage
       value: 1000000
@@ -1380,18 +1402,30 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: tagSettings.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: tagSettings.Array.data[0].tag
       value: Wall
       objectReference: {fileID: 0}
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[1].tag
+      value: Floor
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: tagSettings.Array.data[0].minVelocity
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[1].minVelocity
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: tagSettings.Array.data[0].damageMultiplier
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: tagSettings.Array.data[1].damageMultiplier
       value: 1.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1555,6 +1589,9 @@ MonoBehaviour:
   objectType: 0
   magneticStrength: 600
   range: 10
+  baseForce: 20
+  strengthInfluence: 0.002
+  falloffPower: 2
   usePolarity: 0
   polarity: 1
   rb: {fileID: 0}
@@ -2025,8 +2062,20 @@ PrefabInstance:
       value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: baseForce
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: falloffPower
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: magneticStrength
       value: 501
+      objectReference: {fileID: 0}
+    - target: {fileID: 5764691345652746707, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: strengthInfluence
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2067,6 +2116,10 @@ PrefabInstance:
     - target: {fileID: 7913638205731623604, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7921652071803561034, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
+      propertyPath: m_Mass
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 9204695118293014409, guid: b742bc2d4967e1f4b8d431713885cf6d, type: 3}
       propertyPath: maxDamage
@@ -2263,7 +2316,10 @@ MonoBehaviour:
   magneticStrength: 500
   baseForce: 50
   range: 10
-  repelBoost: 12
+  strengthInfluence: 0.002
+  falloffPower: 1
+  repelMultiplier: 1.5
+  attractMultiplier: 1.5
   snapDistance: 10
   switchCooldown: 0.25
   currentPolarity: 0
@@ -2345,7 +2401,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 8
   acceleration: 5
-  jumpForce: 12.5
+  jumpForce: 20
   drag: 1
   extraGravity: 20
   controlMultiplier: 1
@@ -2409,7 +2465,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4963144245222016461}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 10
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}

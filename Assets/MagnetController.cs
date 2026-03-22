@@ -1,18 +1,24 @@
 using UnityEngine;
 using System.Collections;
+
 public class MagnetController : MonoBehaviour
 {
     [Header("Magnet Settings")]
     public float magneticStrength = 500f;
-    public float baseForce = 60f;
+    public float baseForce = 40f;
     public float range = 20f;
 
+    [Header("Force Tuning")]
+    public float strengthInfluence = 0.002f;
+    public float falloffPower = 2f;
+
     [Header("Feel Tuning")]
-    public float repelBoost = 12f;
+    public float repelMultiplier = 1.5f;
+    public float attractMultiplier = 1f;
     public float snapDistance = 3f;
 
     [Header("Polarity Switch Settings")]
-    public float switchCooldown = 0.25f; // time between allowed switches
+    public float switchCooldown = 0.25f;
 
     private float lastSwitchTime = -999f;
 
@@ -60,8 +66,6 @@ public class MagnetController : MonoBehaviour
     void RegisterSwitch()
     {
         lastSwitchTime = Time.time;
-
-        // Optional: clear triggers to avoid stacking issues
         animator.ResetTrigger("ToAttract");
         animator.ResetTrigger("ToRepel");
     }
@@ -75,53 +79,57 @@ public class MagnetController : MonoBehaviour
         foreach (Collider hit in hits)
         {
             MetalObject metal = hit.GetComponent<MetalObject>();
-            if (metal == null) continue;
+            if (metal == null || metal.rb == null) continue;
 
-            Rigidbody targetRb = metal.rb;
-            if (targetRb == null) continue;
-
-            Vector3 toCenter = hit.transform.position - transform.position;
-            float distance = toCenter.magnitude;
+            Vector3 toTarget = hit.transform.position - transform.position;
+            float distance = toTarget.magnitude;
 
             if (distance < 0.05f) continue;
 
-            Vector3 dir = toCenter.normalized;
+            Vector3 dir = toTarget.normalized;
 
             bool attract = currentPolarity != metal.polarity;
             Vector3 forceDir = attract ? dir : -dir;
 
-            float targetStrength = metal.magneticStrength;
-
+            // --- FORCE ---
             float distance01 = Mathf.Clamp01(distance / range);
-            float falloff = 1f - distance01;
-            falloff *= falloff;
+            float falloff = Mathf.Pow(1f - distance01, falloffPower);
 
-            float force = baseForce * falloff + 10f;
+            float avgStrength = (magneticStrength + metal.magneticStrength) * 0.5f;
+            float strengthFactor = Mathf.Sqrt(avgStrength);
 
-            float strengthRatio = Mathf.Clamp(magneticStrength / targetStrength, 0.2f, 3f);
-            float playerRatio = Mathf.Clamp(targetStrength / magneticStrength, 0.5f, 3f);
+            float force = (baseForce + strengthFactor * strengthInfluence) * falloff;
 
-            if (targetStrength < magneticStrength)
-            {
-                targetRb.AddForce(-forceDir * force * strengthRatio, ForceMode.Acceleration);
-            }
-            else
-            {
-                rb.AddForce(forceDir * force * playerRatio, ForceMode.Acceleration);
-                rb.linearVelocity += forceDir * (force * 0.02f * playerRatio);
+            force *= attract ? attractMultiplier : repelMultiplier;
 
+            // --- SOFT INFLUENCE (THIS FIXES YOUR ISSUE) ---
+            float ratio = magneticStrength / (metal.magneticStrength + 0.001f);
+            float influence = Mathf.Pow(ratio, 0.5f); // soften differences
+
+            // --- influence split ---
+            float playerFactor = 1f / (1f + influence);
+            float objectFactor = 1f - playerFactor;
+
+            // --- resistance (KEY FIX) ---
+            float playerResistance = 1f;
+
+            // ratio: how strong object is compared to player
+            float relativeStrength = metal.magneticStrength / (magneticStrength + 0.001f);
+
+            // if object is weaker, heavily reduce its effect on player
+            playerResistance = Mathf.Pow(relativeStrength, 2f);
+
+            // apply forces
+            rb.AddForce(forceDir * force * playerFactor * playerResistance, ForceMode.Acceleration);
+            metal.rb.AddForce(-forceDir * force * objectFactor, ForceMode.Acceleration);
+
+            // feedback
+            if (playerFactor > 0.6f)
                 magnetActive = true;
 
-                if (distance < snapDistance)
-                {
-                    rb.AddForce(forceDir * force * 3f * playerRatio, ForceMode.Acceleration);
-                    rb.linearVelocity += forceDir * 5f * playerRatio;
-                }
-
-                if (!attract && distance < 4f)
-                {
-                    rb.linearVelocity += forceDir * (repelBoost * playerRatio);
-                }
+            if (distance < snapDistance && attract)
+            {
+                rb.AddForce(forceDir * force * playerFactor * 2f, ForceMode.Acceleration);
             }
         }
 
@@ -131,10 +139,9 @@ public class MagnetController : MonoBehaviour
         }
     }
 
-   public void OnAttract()
+    public void OnAttract()
     {
-        if (!CanSwitch())
-            return;
+        if (!CanSwitch()) return;
 
         RegisterSwitch();
 
@@ -148,28 +155,10 @@ public class MagnetController : MonoBehaviour
 
         colorRoutine = StartCoroutine(AnimateColor(attractGradient));
     }
-    IEnumerator AnimateColor(Gradient gradient)
-    {
-        float time = 0f;
 
-        while (time < colorTransitionTime)
-        {
-            float t = time / colorTransitionTime;
-
-            Color col = gradient.Evaluate(t);
-            targetRenderer.material.color = col;
-
-            time += Time.deltaTime;
-            yield return null;
-        }
-
-        // ensure final color
-        targetRenderer.material.color = gradient.Evaluate(1f);
-    }
     public void OnRepel()
     {
-        if (!CanSwitch())
-            return;
+        if (!CanSwitch()) return;
 
         RegisterSwitch();
 
@@ -182,5 +171,21 @@ public class MagnetController : MonoBehaviour
             StopCoroutine(colorRoutine);
 
         colorRoutine = StartCoroutine(AnimateColor(repelGradient));
+    }
+
+    IEnumerator AnimateColor(Gradient gradient)
+    {
+        float time = 0f;
+
+        while (time < colorTransitionTime)
+        {
+            float t = time / colorTransitionTime;
+            targetRenderer.material.color = gradient.Evaluate(t);
+
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        targetRenderer.material.color = gradient.Evaluate(1f);
     }
 }

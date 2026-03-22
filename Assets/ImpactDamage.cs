@@ -57,8 +57,8 @@ public class ImpactDamage : MonoBehaviour
 
         TagImpactSettings tagSetting = GetTagSettings(collision.collider.tag);
 
-        float minVelocity = tagSetting != null ? tagSetting.minVelocity : 0f;
-        float tagMultiplier = tagSetting != null ? tagSetting.damageMultiplier : 1f;
+        float minVelocity = tagSetting != null ? tagSetting.minVelocity : 5f;
+        float tagMultiplier = tagSetting != null ? tagSetting.damageMultiplier : 1.25f;
 
         float damage = velocityLoss * baseDamageMultiplier * tagMultiplier;
         damage = Mathf.Clamp(damage, 0f, maxDamage);

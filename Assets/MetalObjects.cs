@@ -15,6 +15,11 @@ public class MetalObject : MonoBehaviour
     public float magneticStrength = 1000f;
     public float range = 10f;
 
+    [Header("Force Tuning")]
+    public float baseForce = 20f;
+    public float strengthInfluence = 0.002f; // how much strength affects force
+    public float falloffPower = 2f; // higher = sharper dropoff
+
     public bool usePolarity = true;
     public MagnetPolarity polarity = MagnetPolarity.Attract;
 
@@ -48,25 +53,46 @@ public class MetalObject : MonoBehaviour
 
             Vector3 dir = toOther.normalized;
 
-            bool attract = (usePolarity && other.usePolarity)
-                ? polarity != other.polarity
-                : true;
+            if (!(usePolarity || other.usePolarity))
+                continue;
+
+            bool attract = true;
+
+            if (usePolarity && other.usePolarity)
+            {
+                attract = polarity != other.polarity;
+            }
 
             Vector3 forceDir = attract ? dir : -dir;
 
-            float total = magneticStrength + other.magneticStrength;
+            // --- NEW: strength affects actual force ---
+            float avgStrength = (magneticStrength + other.magneticStrength) * 0.5f;
 
-            float thisFactor = other.magneticStrength / total;
-            float otherFactor = magneticStrength / total;
+            // logarithmic-ish scaling (prevents tiny differences from exploding)
+            float strengthFactor = Mathf.Sqrt(avgStrength);
 
+            // OR use this if you want even softer:
+            // float strengthFactor = Mathf.Log10(avgStrength + 1f) * 10f;
+
+            float strengthForce = strengthFactor * strengthInfluence;
+
+            // distance falloff
             float distance01 = Mathf.Clamp01(distance / range);
-            float falloff = 1f - distance01;
-            falloff *= falloff;
+            float falloff = Mathf.Pow(1f - distance01, falloffPower);
 
-            float force = 50f * falloff;
+            float finalForce = baseForce + strengthForce * falloff;
 
-            rb.AddForce(forceDir * force * thisFactor, ForceMode.Acceleration);
-            other.rb.AddForce(-forceDir * force * otherFactor, ForceMode.Acceleration);
+            // keep your "who moves more" logic
+            float ratio = magneticStrength / (other.magneticStrength + 0.001f);
+
+            // soften it
+            float influence = Mathf.Pow(ratio, 0.5f); // sqrt softens differences
+
+            float thisFactor = 1f / (1f + influence);
+            float otherFactor = 1f - thisFactor;
+
+            rb.AddForce(forceDir * finalForce * thisFactor, ForceMode.Acceleration);
+            other.rb.AddForce(-forceDir * finalForce * otherFactor, ForceMode.Acceleration);
         }
     }
 }
