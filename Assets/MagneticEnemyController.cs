@@ -22,17 +22,29 @@ public class MagneticEnemyController : MonoBehaviour
     public float airDrag = 0.2f;
 
     [Header("Magnetic Control")]
-    public float insideControl = 0.05f;     // tiny control inside field
-    public float controlRecoverSpeed = 2f;  // how fast control returns outside
+    public float insideControl = 0.05f;      // tiny control inside field
+    public float controlLoseSpeed = 10f;      // fast drop when entering field
+    public float controlRecoverSpeed = 0.5f;  // slow regain after slowing down
+    public float recoverSpeedThreshold = 4f;  // must be below this speed to recover
 
     private Rigidbody rb;
     private bool isGrounded;
 
-    private float controlFactor = 1f; // dynamic control value
+    private float controlFactor = 1f;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+    }
+
+    void Start()
+    {
+        if (player == null)
+        {
+            GameObject found = GameObject.FindWithTag("Player");
+            if (found != null)
+                player = found.transform;
+        }
 
         if (player != null)
             magnet = player.GetComponent<MagnetController>();
@@ -48,13 +60,37 @@ public class MagneticEnemyController : MonoBehaviour
         bool inMagnetRange = IsInMagnetRange();
 
         rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
-        
-        // Smooth control transitions
-        float targetControl = inMagnetRange ? insideControl : 1f;
+
+        // Use total velocity so fast vertical falls also block recovery
+        float currentSpeed = rb.linearVelocity.magnitude;
+        bool travellingFast = currentSpeed > recoverSpeedThreshold;
+
+        float targetControl;
+        float speed;
+
+        if (inMagnetRange)
+        {
+            // Inside field: rapidly lose control
+            targetControl = insideControl;
+            speed = controlLoseSpeed;
+        }
+        else if (travellingFast)
+        {
+            // Flung out and still moving fast: freeze control where it is
+            targetControl = controlFactor;
+            speed = 0f;
+        }
+        else
+        {
+            // Slowed down enough: gradually recover control
+            targetControl = 1f;
+            speed = controlRecoverSpeed;
+        }
+
         controlFactor = Mathf.MoveTowards(
             controlFactor,
             targetControl,
-            controlRecoverSpeed * Time.fixedDeltaTime
+            speed * Time.fixedDeltaTime
         );
 
         // Movement
@@ -72,7 +108,9 @@ public class MagneticEnemyController : MonoBehaviour
 
     void CheckGround()
     {
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer);
+        Vector3 origin = transform.position + Vector3.up * 0.1f;
+        isGrounded = Physics.Raycast(origin, Vector3.down, groundCheckDistance + 0.1f, groundLayer);
+        Debug.DrawRay(transform.position, Vector3.down * groundCheckDistance, isGrounded ? Color.green : Color.red);
     }
 
     bool IsInMagnetRange()
@@ -86,7 +124,6 @@ public class MagneticEnemyController : MonoBehaviour
 
     void GroundMovement(float control)
     {
-        // If almost no control, don't fight physics
         if (control < 0.01f)
             return;
 
@@ -102,12 +139,10 @@ public class MagneticEnemyController : MonoBehaviour
         Vector3 velocityChange = (desiredVelocity - rb.linearVelocity);
         velocityChange.y = 0f;
 
-        // KEY: scaled force (never overrides physics fully)
         Vector3 force = velocityChange * acceleration * control;
 
         rb.AddForce(force, ForceMode.Acceleration);
 
-        // Rotate based on control
         if (control > 0.1f && dir != Vector3.zero)
         {
             Quaternion targetRot = Quaternion.LookRotation(dir);
@@ -123,19 +158,15 @@ public class MagneticEnemyController : MonoBehaviour
     {
         /*
         Vector3 vel = rb.linearVelocity;
-
         Vector3 horizontal = new Vector3(vel.x, 0f, vel.z);
-
-        // slight damping only (keeps motion readable)
         horizontal *= (1f - airDrag * Time.fixedDeltaTime);
-
         rb.linearVelocity = new Vector3(horizontal.x, vel.y, horizontal.z);
         */
     }
 
     void LimitSpeed()
     {
-        // Only limit when we have control (prevents killing flings)
+        // Only limit speed when enemy has meaningful control (prevents killing flings)
         if (controlFactor < 0.5f)
             return;
 

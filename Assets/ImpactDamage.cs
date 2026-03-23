@@ -9,12 +9,24 @@ public class TagImpactSettings
     public float damageMultiplier = 1f;
 }
 
+public enum HitStrength
+{
+    Small,
+    Medium,
+    Big
+}
+
 public class ImpactDamage : MonoBehaviour
 {
     [Header("Global Damage Settings")]
     public float baseDamageMultiplier = 2f;
     public float maxDamage = 50f;
     public float hitCooldown = 0.1f;
+
+    [Header("Hit Strength Thresholds")]
+    public float smallHitThreshold = 5f;
+    public float mediumHitThreshold = 15f;
+    // anything above medium = Big
 
     [Header("Tag-Based Settings")]
     public List<TagImpactSettings> tagSettings = new List<TagImpactSettings>();
@@ -46,6 +58,41 @@ public class ImpactDamage : MonoBehaviour
         return null;
     }
 
+    HitStrength GetHitStrength(float damage, float velocity)
+    {
+        float value = Mathf.Max(damage, velocity);
+
+        if (value < smallHitThreshold)
+            return HitStrength.Small;
+        else if (value < mediumHitThreshold)
+            return HitStrength.Medium;
+        else
+            return HitStrength.Big;
+    }
+
+    void HandleHitEffect(HitStrength strength, Vector3 point, Vector3 normal)
+    {
+        // This is your expansion point
+
+        switch (strength)
+        {
+            case HitStrength.Small:
+                Debug.Log("SMALL HIT");
+                // TODO: light particles, small sound
+                break;
+
+            case HitStrength.Medium:
+                Debug.Log("MEDIUM HIT");
+                // TODO: medium VFX, stronger sound
+                break;
+
+            case HitStrength.Big:
+                Debug.Log("BIG HIT");
+                // TODO: heavy VFX, screen shake, decals
+                break;
+        }
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (Time.time < lastHitTime + hitCooldown)
@@ -63,14 +110,7 @@ public class ImpactDamage : MonoBehaviour
         ContactPoint contact = collision.contacts[0];
         Vector3 normal = contact.normal;
 
-        // -------------------------
-        // FIX 1: ALIGNMENT DETECTION
-        // -------------------------
         float alignment = Vector3.Dot(lastVelocity.normalized, -normal);
-
-        // -------------------------
-        // FIX 2: SCALE DAMAGE BY ALIGNMENT
-        // -------------------------
         float alignmentMultiplier = Mathf.Clamp01((alignment - 0.3f) * 2f);
 
         float damage = velocityLoss * baseDamageMultiplier * tagMultiplier * alignmentMultiplier;
@@ -83,7 +123,6 @@ public class ImpactDamage : MonoBehaviour
         {
             if (velocityLoss < minVelocity) return;
             if (relativeVelocity < minVelocity) return;
-
             if (alignmentMultiplier <= 0f) return;
 
             EnemyHealth enemy = collision.collider.GetComponent<EnemyHealth>();
@@ -91,9 +130,10 @@ public class ImpactDamage : MonoBehaviour
             {
                 enemy.TakeDamage(damage);
 
-                // -------------------------
-                // FIX 4: EXTRA COOLDOWN FOR SLIDING
-                // -------------------------
+                // HIT EFFECT
+                HitStrength strength = GetHitStrength(damage, velocityBefore);
+                HandleHitEffect(strength, contact.point, normal);
+
                 if (alignment < 0.6f)
                     lastHitTime = Time.time + 0.2f;
                 else
@@ -118,16 +158,17 @@ public class ImpactDamage : MonoBehaviour
                 return;
 
             float enemyDamage = enemyVelocity * baseDamageMultiplier * tagMultiplier * 0.5f;
-
-            // Apply alignment scaling here too for consistency
             enemyDamage *= alignmentMultiplier;
-
             enemyDamage = Mathf.Clamp(enemyDamage, 0f, maxDamage);
 
             EnemyHealth self = GetComponent<EnemyHealth>();
             if (self != null)
             {
                 self.TakeDamage(enemyDamage);
+
+                // HIT EFFECT
+                HitStrength strength = GetHitStrength(enemyDamage, enemyVelocity);
+                HandleHitEffect(strength, contact.point, normal);
 
                 if (alignment < 0.6f)
                     lastHitTime = Time.time + 0.2f;
