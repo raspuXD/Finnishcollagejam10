@@ -148,6 +148,9 @@ public class MagnetController : MonoBehaviour
         if (!CanSwitch())
             return;
 
+        if(currentPolarity == MagnetPolarity.Attract)
+            return;
+        
         RegisterSwitch();
 
         currentPolarity = MagnetPolarity.Attract;
@@ -181,6 +184,9 @@ public class MagnetController : MonoBehaviour
     public void OnRepel()
     {
         if (!CanSwitch())
+            return;
+        
+        if(currentPolarity == MagnetPolarity.Repel)
             return;
 
         RegisterSwitch();
