@@ -48,9 +48,11 @@ public class MetalObject : MonoBehaviour
 
             Vector3 dir = toOther.normalized;
 
-            bool attract = (usePolarity && other.usePolarity)
-                ? polarity != other.polarity
-                : true;
+            // ONLY interact if BOTH use polarity
+            if (!usePolarity || !other.usePolarity)
+                continue;
+
+            bool attract = polarity != other.polarity;
 
             Vector3 forceDir = attract ? dir : -dir;
 

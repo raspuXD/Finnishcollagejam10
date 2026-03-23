@@ -87,7 +87,19 @@ public class MagnetController : MonoBehaviour
 
             Vector3 dir = toCenter.normalized;
 
-            bool attract = currentPolarity != metal.polarity;
+            bool attract;
+
+            if (metal.usePolarity)
+            {
+                // Normal polarity logic
+                attract = currentPolarity != metal.polarity;
+            }
+            else
+            {
+                // NO polarity → follow player mode directly
+                attract = currentPolarity == MagnetPolarity.Attract;
+            }
+
             Vector3 forceDir = attract ? dir : -dir;
 
             float targetStrength = metal.magneticStrength;
@@ -98,30 +110,30 @@ public class MagnetController : MonoBehaviour
 
             float force = baseForce * falloff + 10f;
 
-            float strengthRatio = Mathf.Clamp(magneticStrength / targetStrength, 0.2f, 3f);
-            float playerRatio = Mathf.Clamp(targetStrength / magneticStrength, 0.5f, 3f);
+            // Strength now affects HOW MUCH objects move, not WHO moves
+            float strengthFactor = magneticStrength / (magneticStrength + targetStrength);
 
-            if (targetStrength < magneticStrength)
+            // Optional clamp so nothing becomes completely immovable
+            strengthFactor = Mathf.Clamp(strengthFactor, 0.1f, 1f);
+
+            // Apply force ONLY to the object (player is always dominant)
+            targetRb.AddForce(-forceDir * force * strengthFactor, ForceMode.Acceleration);
+
+            // Feedback to player (optional, keeps some "weight" feeling)
+            float feedback = 1f - strengthFactor;
+            rb.AddForce(forceDir * force * 0.2f * feedback, ForceMode.Acceleration);
+
+            magnetActive = true;
+
+            // Extra feel tweaks (still valid)
+            if (distance < snapDistance)
             {
-                targetRb.AddForce(-forceDir * force * strengthRatio, ForceMode.Acceleration);
+                targetRb.AddForce(-forceDir * force * 2f * strengthFactor, ForceMode.Acceleration);
             }
-            else
+
+            if (!attract && distance < 4f)
             {
-                rb.AddForce(forceDir * force * playerRatio, ForceMode.Acceleration);
-                rb.linearVelocity += forceDir * (force * 0.02f * playerRatio);
-
-                magnetActive = true;
-
-                if (distance < snapDistance)
-                {
-                    rb.AddForce(forceDir * force * 3f * playerRatio, ForceMode.Acceleration);
-                    rb.linearVelocity += forceDir * 5f * playerRatio;
-                }
-
-                if (!attract && distance < 4f)
-                {
-                    rb.linearVelocity += forceDir * (repelBoost * playerRatio);
-                }
+                targetRb.linearVelocity += -forceDir * (repelBoost * strengthFactor);
             }
         }
 

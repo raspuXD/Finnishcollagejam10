@@ -60,7 +60,20 @@ public class ImpactDamage : MonoBehaviour
         float minVelocity = tagSetting != null ? tagSetting.minVelocity : 0f;
         float tagMultiplier = tagSetting != null ? tagSetting.damageMultiplier : 1f;
 
-        float damage = velocityLoss * baseDamageMultiplier * tagMultiplier;
+        ContactPoint contact = collision.contacts[0];
+        Vector3 normal = contact.normal;
+
+        // -------------------------
+        // FIX 1: ALIGNMENT DETECTION
+        // -------------------------
+        float alignment = Vector3.Dot(lastVelocity.normalized, -normal);
+
+        // -------------------------
+        // FIX 2: SCALE DAMAGE BY ALIGNMENT
+        // -------------------------
+        float alignmentMultiplier = Mathf.Clamp01((alignment - 0.3f) * 2f);
+
+        float damage = velocityLoss * baseDamageMultiplier * tagMultiplier * alignmentMultiplier;
         damage = Mathf.Clamp(damage, 0f, maxDamage);
 
         // -------------------------
@@ -71,17 +84,21 @@ public class ImpactDamage : MonoBehaviour
             if (velocityLoss < minVelocity) return;
             if (relativeVelocity < minVelocity) return;
 
-            ContactPoint contact = collision.contacts[0];
-            Vector3 normal = contact.normal;
-
-            float alignment = Vector3.Dot(lastVelocity.normalized, -normal);
-            if (alignment < 0.5f) return;
+            if (alignmentMultiplier <= 0f) return;
 
             EnemyHealth enemy = collision.collider.GetComponent<EnemyHealth>();
             if (enemy != null)
             {
                 enemy.TakeDamage(damage);
-                lastHitTime = Time.time;
+
+                // -------------------------
+                // FIX 4: EXTRA COOLDOWN FOR SLIDING
+                // -------------------------
+                if (alignment < 0.6f)
+                    lastHitTime = Time.time + 0.2f;
+                else
+                    lastHitTime = Time.time;
+
                 Debug.Log("ENEMY DAMAGE: " + damage);
             }
 
@@ -102,13 +119,21 @@ public class ImpactDamage : MonoBehaviour
 
             float enemyDamage = enemyVelocity * baseDamageMultiplier * tagMultiplier * 0.5f;
 
+            // Apply alignment scaling here too for consistency
+            enemyDamage *= alignmentMultiplier;
+
             enemyDamage = Mathf.Clamp(enemyDamage, 0f, maxDamage);
 
             EnemyHealth self = GetComponent<EnemyHealth>();
             if (self != null)
             {
                 self.TakeDamage(enemyDamage);
-                lastHitTime = Time.time;
+
+                if (alignment < 0.6f)
+                    lastHitTime = Time.time + 0.2f;
+                else
+                    lastHitTime = Time.time;
+
                 Debug.Log("ENEMY DAMAGE: " + enemyDamage);
             }
         }
