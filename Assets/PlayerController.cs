@@ -5,7 +5,11 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 8f;
     public float acceleration = 20f;
+
     public float jumpForce = 5f;
+    public int MaxJump = 1;
+    private int CurrentJumps;
+
     public float drag = 1f;
     public float extraGravity = 20f;
 
@@ -13,10 +17,10 @@ public class PlayerController : MonoBehaviour
 
     public Transform cameraTransform;
 
-    
-
     private Vector2 moveInput;
     private Rigidbody rb;
+
+    private bool isGrounded;
 
     void Awake()
     {
@@ -35,24 +39,21 @@ public class PlayerController : MonoBehaviour
     {
         Move();
 
-        // Add stronger downward force
+        // Extra gravity
         rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
     }
 
     void Move()
     {
-        // Get camera directions
         Vector3 forward = cameraTransform.forward;
         Vector3 right = cameraTransform.right;
 
-        // Flatten them
         forward.y = 0;
         right.y = 0;
 
         forward.Normalize();
         right.Normalize();
 
-        // Camera-relative movement
         Vector3 move = forward * moveInput.y + right * moveInput.x;
 
         Vector3 targetVelocity = move * moveSpeed;
@@ -63,8 +64,6 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(velocityChange * acceleration * controlMultiplier, ForceMode.Acceleration);
     }
 
-    // INPUT SYSTEM
-
     public void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
@@ -72,6 +71,19 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump()
     {
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        if (CurrentJumps < MaxJump)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            CurrentJumps++;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Simple ground check (you can improve with layers later)
+        if (collision.contacts[0].normal.y > 0.5f)
+        {
+            CurrentJumps = 0;
+        }
     }
 }
