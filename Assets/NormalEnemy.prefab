@@ -190,6 +190,9 @@ MonoBehaviour:
   - tag: Prop
     minVelocity: 2
     damageMultiplier: 2.5
+  - tag: Enemy
+    minVelocity: 20
+    damageMultiplier: 1.5
 --- !u!114 &55205842586465243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,6 +207,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ContactDamage
   damage: 10
   cooldown: 0.2
+  minVelocity: 2
 --- !u!114 &2011625040296893962
 MonoBehaviour:
   m_ObjectHideFlags: 0

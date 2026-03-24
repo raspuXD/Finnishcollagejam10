@@ -58,16 +58,11 @@ public class ImpactDamage : MonoBehaviour
         return null;
     }
 
-    HitStrength GetHitStrength(float damage, float velocity)
+    HitStrength GetHitStrength(float damage)
     {
-        float value = Mathf.Max(damage, velocity);
-
-        if (value < smallHitThreshold)
-            return HitStrength.Small;
-        else if (value < mediumHitThreshold)
-            return HitStrength.Medium;
-        else
-            return HitStrength.Big;
+        if (damage < smallHitThreshold)  return HitStrength.Small;
+        if (damage < mediumHitThreshold) return HitStrength.Medium;
+        return HitStrength.Big;
     }
 
     void HandleHitEffect(HitStrength strength, Vector3 point, Vector3 normal)
@@ -131,7 +126,7 @@ public class ImpactDamage : MonoBehaviour
                 enemy.TakeDamage(damage);
 
                 // HIT EFFECT
-                HitStrength strength = GetHitStrength(damage, velocityBefore);
+                HitStrength strength = GetHitStrength(damage);
                 HandleHitEffect(strength, contact.point, normal);
 
                 if (alignment < 0.6f)
@@ -167,7 +162,7 @@ public class ImpactDamage : MonoBehaviour
                 self.TakeDamage(enemyDamage);
 
                 // HIT EFFECT
-                HitStrength strength = GetHitStrength(enemyDamage, enemyVelocity);
+                HitStrength strength = GetHitStrength(enemyDamage);
                 HandleHitEffect(strength, contact.point, normal);
 
                 if (alignment < 0.6f)
@@ -175,7 +170,6 @@ public class ImpactDamage : MonoBehaviour
                 else
                     lastHitTime = Time.time;
 
-                Debug.Log("ENEMY DAMAGE: " + enemyDamage);
             }
         }
     }
