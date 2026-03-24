@@ -111,6 +111,8 @@ public class ImpactDamage : MonoBehaviour
         if (Time.time < lastHitTime + hitCooldown)
             return;
 
+        string hitTag = collision.collider.tag;
+        
         float velocityBefore = lastVelocity.magnitude;
         float relativeVelocity = collision.relativeVelocity.magnitude;
         float velocityLoss = velocityBefore - relativeVelocity;
@@ -141,7 +143,7 @@ public class ImpactDamage : MonoBehaviour
             EnemyHealth enemy = collision.collider.GetComponent<EnemyHealth>();
             if (enemy != null)
             {
-                enemy.TakeDamage(damage);
+                enemy.TakeDamage(damage, hitTag);
 
                 // HIT EFFECT
                 HitStrength strength = GetHitStrength(damage);
@@ -177,7 +179,7 @@ public class ImpactDamage : MonoBehaviour
             EnemyHealth self = GetComponent<EnemyHealth>();
             if (self != null)
             {
-                self.TakeDamage(enemyDamage);
+                self.TakeDamage(enemyDamage, collision.gameObject.tag);
 
                 // HIT EFFECT
                 HitStrength strength = GetHitStrength(enemyDamage);
