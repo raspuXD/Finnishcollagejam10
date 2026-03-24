@@ -14,7 +14,16 @@ public class KillTypeScore
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
+    // Add with the other properties at the top
+    public int Tokens { get; private set; }
 
+    const string TOKENS_KEY = "Tokens";
+
+    // Add to Awake alongside the other PlayerPrefs loads
+    
+
+    // Add this event with the other events
+    public UnityEvent<int> onTokensChanged;
     [Header("Kill Scores")]
     public List<KillTypeScore> killScores = new List<KillTypeScore>()
     {
@@ -63,9 +72,16 @@ public class ScoreManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
+        Tokens = PlayerPrefs.GetInt(TOKENS_KEY, 0);
+        HighScore    = PlayerPrefs.GetInt(HIGHSCORE_KEY, 0);
+        CurrentLevel = 1;
+        CurrentXP    = 0;
+        Tokens       = 0;
+        /*
         HighScore    = PlayerPrefs.GetInt(HIGHSCORE_KEY, 0);
         CurrentLevel = PlayerPrefs.GetInt(LEVEL_KEY, 1);
         CurrentXP    = PlayerPrefs.GetInt(XP_KEY, 0);
+        */
     }
 
     void Update()
@@ -135,8 +151,12 @@ public class ScoreManager : MonoBehaviour
         {
             CurrentXP    -= xpPerLevel;
             CurrentLevel ++;
+            Tokens       ++;
+            PlayerPrefs.SetInt(TOKENS_KEY, Tokens);
+            PlayerPrefs.Save();
             onLevelUp?.Invoke(CurrentLevel);
-            Debug.Log($"[Score] Level up! Now level {CurrentLevel}");
+            onTokensChanged?.Invoke(Tokens);
+            Debug.Log($"Level up! Level {CurrentLevel} — Tokens: {Tokens}");
         }
     }
 
@@ -145,6 +165,15 @@ public class ScoreManager : MonoBehaviour
         ChainCount  = 0;
         chainActive = false;
         onChainUpdated?.Invoke(0);
+    }
+    public bool SpendTokens(int amount)
+    {
+        if (Tokens < amount) return false;
+        Tokens -= amount;
+        PlayerPrefs.SetInt(TOKENS_KEY, Tokens);
+        PlayerPrefs.Save();
+        onTokensChanged?.Invoke(Tokens);
+        return true;
     }
 
     KillTypeScore GetKillType(string causeTag)

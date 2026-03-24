@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+
 public class MagnetController : MonoBehaviour
 {
     [Header("Magnet Settings")]
@@ -12,8 +13,7 @@ public class MagnetController : MonoBehaviour
     public float snapDistance = 3f;
 
     [Header("Polarity Switch Settings")]
-    public float switchCooldown = 0.25f; // time between allowed switches
-
+    public float switchCooldown = 0.25f;
     private float lastSwitchTime = -999f;
 
     public MagnetPolarity currentPolarity = MagnetPolarity.Attract;
@@ -45,12 +45,42 @@ public class MagnetController : MonoBehaviour
         {
             if (playerController != null)
                 playerController.controlMultiplier = 1f;
-
             return;
         }
 
         ApplyMagnetism();
     }
+
+    // ── Toggle ─────────────────────────────────────────────────────
+
+    public void TurnOn()
+    {
+        currentEnabled = Enabled.ON;
+
+        // Restore last polarity visual
+        if (colorRoutine != null) StopCoroutine(colorRoutine);
+        colorRoutine = StartCoroutine(AnimateColor(
+            currentPolarity == MagnetPolarity.Attract ? attractGradient : repelGradient
+        ));
+
+        animator.SetTrigger(currentPolarity == MagnetPolarity.Attract ? "ToAttract" : "ToRepel");
+    }
+
+    public void TurnOff()
+    {
+        currentEnabled = Enabled.OFF;
+
+        if (colorRoutine != null) StopCoroutine(colorRoutine);
+
+        // Grey out the renderer to show it's off
+        if (targetRenderer != null)
+            targetRenderer.material.color = Color.gray;
+
+        if (playerController != null)
+            playerController.controlMultiplier = 1f;
+    }
+
+    // ── Polarity ───────────────────────────────────────────────────
 
     bool CanSwitch()
     {
@@ -60,17 +90,48 @@ public class MagnetController : MonoBehaviour
     void RegisterSwitch()
     {
         lastSwitchTime = Time.time;
-
-        // Optional: clear triggers to avoid stacking issues
         animator.ResetTrigger("ToAttract");
         animator.ResetTrigger("ToRepel");
     }
 
+    public void OnAttract()
+    {
+        if (!CanSwitch()) return;
+        if (currentPolarity == MagnetPolarity.Attract) return;
+
+        RegisterSwitch();
+
+        currentPolarity = MagnetPolarity.Attract;
+        currentEnabled  = Enabled.ON;
+
+        animator.SetTrigger("ToAttract");
+
+        if (colorRoutine != null) StopCoroutine(colorRoutine);
+        colorRoutine = StartCoroutine(AnimateColor(attractGradient));
+    }
+
+    public void OnRepel()
+    {
+        if (!CanSwitch()) return;
+        if (currentPolarity == MagnetPolarity.Repel) return;
+
+        RegisterSwitch();
+
+        currentPolarity = MagnetPolarity.Repel;
+        currentEnabled  = Enabled.ON;
+
+        animator.SetTrigger("ToRepel");
+
+        if (colorRoutine != null) StopCoroutine(colorRoutine);
+        colorRoutine = StartCoroutine(AnimateColor(repelGradient));
+    }
+
+    // ── Magnetism ──────────────────────────────────────────────────
+
     void ApplyMagnetism()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, range);
-
-        bool magnetActive = false;
+        Collider[] hits    = Physics.OverlapSphere(transform.position, range);
+        bool magnetActive  = false;
 
         foreach (Collider hit in hits)
         {
@@ -81,124 +142,52 @@ public class MagnetController : MonoBehaviour
             if (targetRb == null) continue;
 
             Vector3 toCenter = hit.transform.position - transform.position;
-            float distance = toCenter.magnitude;
-
+            float distance   = toCenter.magnitude;
             if (distance < 0.05f) continue;
 
             Vector3 dir = toCenter.normalized;
 
-            bool attract;
+            bool attract = metal.usePolarity
+                ? currentPolarity != metal.polarity
+                : currentPolarity == MagnetPolarity.Attract;
 
-            if (metal.usePolarity)
-            {
-                // Normal polarity logic
-                attract = currentPolarity != metal.polarity;
-            }
-            else
-            {
-                // NO polarity → follow player mode directly
-                attract = currentPolarity == MagnetPolarity.Attract;
-            }
+            Vector3 forceDir       = attract ? dir : -dir;
+            float targetStrength   = metal.magneticStrength;
+            float distance01       = Mathf.Clamp01(distance / range);
+            float falloff          = 1f - distance01;
+            falloff               *= falloff;
+            float force            = baseForce * falloff + 10f;
+            float strengthFactor   = magneticStrength / (magneticStrength + targetStrength);
+            strengthFactor         = Mathf.Clamp(strengthFactor, 0.1f, 1f);
 
-            Vector3 forceDir = attract ? dir : -dir;
-
-            float targetStrength = metal.magneticStrength;
-
-            float distance01 = Mathf.Clamp01(distance / range);
-            float falloff = 1f - distance01;
-            falloff *= falloff;
-
-            float force = baseForce * falloff + 10f;
-
-            // Strength now affects HOW MUCH objects move, not WHO moves
-            float strengthFactor = magneticStrength / (magneticStrength + targetStrength);
-
-            // Optional clamp so nothing becomes completely immovable
-            strengthFactor = Mathf.Clamp(strengthFactor, 0.1f, 1f);
-
-            // Apply force ONLY to the object (player is always dominant)
             targetRb.AddForce(-forceDir * force * strengthFactor, ForceMode.Acceleration);
 
-            // Feedback to player (optional, keeps some "weight" feeling)
             float feedback = 1f - strengthFactor;
             rb.AddForce(forceDir * force * 0.2f * feedback, ForceMode.Acceleration);
 
             magnetActive = true;
 
-            // Extra feel tweaks (still valid)
             if (distance < snapDistance)
-            {
                 targetRb.AddForce(-forceDir * force * 2f * strengthFactor, ForceMode.Acceleration);
-            }
 
             if (!attract && distance < 4f)
-            {
                 targetRb.linearVelocity += -forceDir * (repelBoost * strengthFactor);
-            }
         }
 
         if (playerController != null)
-        {
             playerController.controlMultiplier = magnetActive ? 0.5f : 1f;
-        }
     }
 
-   public void OnAttract()
-    {
-        if (!CanSwitch())
-            return;
-
-        if(currentPolarity == MagnetPolarity.Attract)
-            return;
-        
-        RegisterSwitch();
-
-        currentPolarity = MagnetPolarity.Attract;
-        currentEnabled = Enabled.ON;
-
-        animator.SetTrigger("ToAttract");
-
-        if (colorRoutine != null)
-            StopCoroutine(colorRoutine);
-
-        colorRoutine = StartCoroutine(AnimateColor(attractGradient));
-    }
     IEnumerator AnimateColor(Gradient gradient)
     {
         float time = 0f;
-
         while (time < colorTransitionTime)
         {
             float t = time / colorTransitionTime;
-
-            Color col = gradient.Evaluate(t);
-            targetRenderer.material.color = col;
-
+            targetRenderer.material.color = gradient.Evaluate(t);
             time += Time.deltaTime;
             yield return null;
         }
-
-        // ensure final color
         targetRenderer.material.color = gradient.Evaluate(1f);
-    }
-    public void OnRepel()
-    {
-        if (!CanSwitch())
-            return;
-        
-        if(currentPolarity == MagnetPolarity.Repel)
-            return;
-
-        RegisterSwitch();
-
-        currentPolarity = MagnetPolarity.Repel;
-        currentEnabled = Enabled.ON;
-
-        animator.SetTrigger("ToRepel");
-
-        if (colorRoutine != null)
-            StopCoroutine(colorRoutine);
-
-        colorRoutine = StartCoroutine(AnimateColor(repelGradient));
     }
 }

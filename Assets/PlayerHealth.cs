@@ -1,16 +1,18 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 
 public class PlayerHealth : MonoBehaviour
 {
     public float maxHealth = 100f;
     [SerializeField] private float currentHealth;
 
-    public UnityEvent<float> onHealthChanged;  // normalized 0-1
-    public UnityEvent<string> onDeath;
-    
+    [Header("Regen")]
+    public float regenDelay = 3f;  // seconds after last hit before regen resumes
+    private float lastHitTime = -999f;
+    public bool CanRegen => Time.time >= lastHitTime + regenDelay;
 
+    public UnityEvent<float> onHealthChanged;
+    public UnityEvent<string> onDeath;
 
     void Awake()
     {
@@ -19,8 +21,8 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float damage, string causeTag = "Unknown")
     {
-        currentHealth -= damage;
-        currentHealth  = Mathf.Max(currentHealth, 0f);
+        currentHealth  = Mathf.Max(currentHealth - damage, 0f);
+        lastHitTime    = Time.time;  // reset regen buffer on every hit
 
         onHealthChanged?.Invoke(GetHealthNormalized());
 
@@ -30,6 +32,8 @@ public class PlayerHealth : MonoBehaviour
 
     public void Heal(float amount)
     {
+        if (!CanRegen) return;  // blocked until buffer expires
+
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         onHealthChanged?.Invoke(GetHealthNormalized());
     }
@@ -38,16 +42,13 @@ public class PlayerHealth : MonoBehaviour
     {
         float ratio   = currentHealth / maxHealth;
         maxHealth     = newMax;
-        currentHealth = maxHealth * ratio;  // scale current health proportionally
+        currentHealth = maxHealth * ratio;
         onHealthChanged?.Invoke(GetHealthNormalized());
     }
 
     void Die(string causeTag)
     {
         onDeath?.Invoke(causeTag);
-        Time.timeScale = 0;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public float GetHealthNormalized() => currentHealth / maxHealth;

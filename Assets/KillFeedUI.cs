@@ -4,7 +4,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 
-public class KillFeedUI : MonoBehaviour
+public class KillFeedUI : MonoBehaviour, IClosableUI
 {
     [Header("References")]
     public ScoreManager scoreManager;
@@ -34,8 +34,8 @@ public class KillFeedUI : MonoBehaviour
 
     private Queue<GameObject> activeFeedEntries = new Queue<GameObject>();
     private Coroutine chainPopupRoutine;
-
-    void OnEnable()
+    public void Hide() => gameObject.SetActive(false);
+    public void Show() => gameObject.SetActive(true);    void OnEnable()
     {
         if (scoreManager == null) return;
 
@@ -78,7 +78,7 @@ public class KillFeedUI : MonoBehaviour
             scoreText.text = score.ToString("N0");
 
         if (highscoreText != null)
-            highscoreText.text = $"BEST: {scoreManager.HighScore:N0}";
+            highscoreText.text = $"BEST HIGHSCORE: {scoreManager.HighScore:N0}";
     }
 
     void UpdateChain(int chain)

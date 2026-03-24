@@ -138,9 +138,18 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Magnet"",
+                    ""name"": ""ToggleMagnet"",
                     ""type"": ""Button"",
                     ""id"": ""bd3ff608-596d-4676-9a48-2d6a0d7517f6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleUpgradeMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""9ee252c8-4156-426f-b66d-afd1015462fa"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -238,8 +247,30 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""6d355c05-e129-4879-b12b-0df557709a98"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attract"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""90b293e9-f925-44c8-9bdc-bb5424a2d7fb"",
                     ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Repel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""de15db04-07b3-4b9c-bfbc-154b43629a78"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -254,7 +285,18 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Magnet"",
+                    ""action"": ""ToggleMagnet"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d183896a-2e64-4ed3-871f-cde6fef727aa"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleUpgradeMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -270,7 +312,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Movement_Jump = m_Movement.FindAction("Jump", throwIfNotFound: true);
         m_Movement_Attract = m_Movement.FindAction("Attract", throwIfNotFound: true);
         m_Movement_Repel = m_Movement.FindAction("Repel", throwIfNotFound: true);
-        m_Movement_Magnet = m_Movement.FindAction("Magnet", throwIfNotFound: true);
+        m_Movement_ToggleMagnet = m_Movement.FindAction("ToggleMagnet", throwIfNotFound: true);
+        m_Movement_ToggleUpgradeMenu = m_Movement.FindAction("ToggleUpgradeMenu", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -356,7 +399,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Movement_Jump;
     private readonly InputAction m_Movement_Attract;
     private readonly InputAction m_Movement_Repel;
-    private readonly InputAction m_Movement_Magnet;
+    private readonly InputAction m_Movement_ToggleMagnet;
+    private readonly InputAction m_Movement_ToggleUpgradeMenu;
     /// <summary>
     /// Provides access to input actions defined in input action map "Movement".
     /// </summary>
@@ -389,9 +433,13 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Repel => m_Wrapper.m_Movement_Repel;
         /// <summary>
-        /// Provides access to the underlying input action "Movement/Magnet".
+        /// Provides access to the underlying input action "Movement/ToggleMagnet".
         /// </summary>
-        public InputAction @Magnet => m_Wrapper.m_Movement_Magnet;
+        public InputAction @ToggleMagnet => m_Wrapper.m_Movement_ToggleMagnet;
+        /// <summary>
+        /// Provides access to the underlying input action "Movement/ToggleUpgradeMenu".
+        /// </summary>
+        public InputAction @ToggleUpgradeMenu => m_Wrapper.m_Movement_ToggleUpgradeMenu;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -433,9 +481,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Repel.started += instance.OnRepel;
             @Repel.performed += instance.OnRepel;
             @Repel.canceled += instance.OnRepel;
-            @Magnet.started += instance.OnMagnet;
-            @Magnet.performed += instance.OnMagnet;
-            @Magnet.canceled += instance.OnMagnet;
+            @ToggleMagnet.started += instance.OnToggleMagnet;
+            @ToggleMagnet.performed += instance.OnToggleMagnet;
+            @ToggleMagnet.canceled += instance.OnToggleMagnet;
+            @ToggleUpgradeMenu.started += instance.OnToggleUpgradeMenu;
+            @ToggleUpgradeMenu.performed += instance.OnToggleUpgradeMenu;
+            @ToggleUpgradeMenu.canceled += instance.OnToggleUpgradeMenu;
         }
 
         /// <summary>
@@ -462,9 +513,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Repel.started -= instance.OnRepel;
             @Repel.performed -= instance.OnRepel;
             @Repel.canceled -= instance.OnRepel;
-            @Magnet.started -= instance.OnMagnet;
-            @Magnet.performed -= instance.OnMagnet;
-            @Magnet.canceled -= instance.OnMagnet;
+            @ToggleMagnet.started -= instance.OnToggleMagnet;
+            @ToggleMagnet.performed -= instance.OnToggleMagnet;
+            @ToggleMagnet.canceled -= instance.OnToggleMagnet;
+            @ToggleUpgradeMenu.started -= instance.OnToggleUpgradeMenu;
+            @ToggleUpgradeMenu.performed -= instance.OnToggleUpgradeMenu;
+            @ToggleUpgradeMenu.canceled -= instance.OnToggleUpgradeMenu;
         }
 
         /// <summary>
@@ -541,11 +595,18 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRepel(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Magnet" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "ToggleMagnet" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMagnet(InputAction.CallbackContext context);
+        void OnToggleMagnet(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleUpgradeMenu" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleUpgradeMenu(InputAction.CallbackContext context);
     }
 }

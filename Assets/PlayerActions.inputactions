@@ -52,9 +52,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Magnet",
+                    "name": "ToggleMagnet",
                     "type": "Button",
                     "id": "bd3ff608-596d-4676-9a48-2d6a0d7517f6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ToggleUpgradeMenu",
+                    "type": "Button",
+                    "id": "9ee252c8-4156-426f-b66d-afd1015462fa",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -152,8 +161,30 @@
                 },
                 {
                     "name": "",
+                    "id": "6d355c05-e129-4879-b12b-0df557709a98",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Attract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "90b293e9-f925-44c8-9bdc-bb5424a2d7fb",
                     "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Repel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de15db04-07b3-4b9c-bfbc-154b43629a78",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -168,7 +199,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Magnet",
+                    "action": "ToggleMagnet",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d183896a-2e64-4ed3-871f-cde6fef727aa",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleUpgradeMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

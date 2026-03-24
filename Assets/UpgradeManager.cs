@@ -1,176 +1,293 @@
 using UnityEngine;
-using System;
-using Unity.VisualScripting;
-using System.Runtime.CompilerServices;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.InputSystem;
+
+[System.Serializable]
+public class Upgrade
+{
+    public string id;
+    public string displayName;
+    public string description;
+    public int    maxLevel;
+    public int    currentLevel;
+    public float  valuePerLevel;
+    public float  baseValue;
+    public int    tokenCost;
+
+    public bool  IsMaxed      => currentLevel >= maxLevel;
+    public float CurrentValue => baseValue + valuePerLevel * currentLevel;
+    public float NextValue    => baseValue + valuePerLevel * (currentLevel + 1);
+}
 
 public class UpgradeManager : MonoBehaviour
 {
     public static UpgradeManager Instance;
 
-    [Header("Tokens")]
-    public int tokens;
-
     [Header("References")]
-    public PlayerController player;
-    public PlayerHealth health;
-    public MagnetController magnet;
+    public PlayerController playerController;
+    public PlayerHealth     playerHealth;
+    public MagnetController magnetController;
+    public ScoreManager     scoreManager;
 
-    [Header("Upgrade Levels")]
-    public int maxHealthLevel;
-    public int regenLevel;
-    public int jumpForceLevel;
-    public int maxJumpsLevel;
-    public int moveSpeedLevel;
-    public int accelerationLevel;
-    public int magnetStrengthLevel;
-    public int magnetRangeLevel;
-    public int magnetUnlockLevel;
+    [Header("Regen")]
+    public float regenTickRate = 1f;
 
-    [Header("Canvases")]
-    public GameObject PlayCanvas;
-    public GameObject UpgradeCanvas;
-    public MouseUnlock mouseUnlocker;
+    [Header("Upgrade Menu UI")]
+    public GameObject upgradeMenuRoot;
+    public Transform  upgradeButtonContainer;
+    public GameObject upgradeButtonPrefab;
+    public TextMeshProUGUI tokenCountText;
+
+    [Header("Upgrades")]
+    public List<Upgrade> upgrades = new List<Upgrade>()
+    {
+        new Upgrade { id = "max_health",      displayName = "Max Health",      description = "+25 max health per level",       maxLevel = 5, baseValue = 100f, valuePerLevel = 25f,  tokenCost = 1 },
+        new Upgrade { id = "health_regen",    displayName = "Health Regen",    description = "+2 hp/sec per level",            maxLevel = 5, baseValue = 0f,   valuePerLevel = 2f,   tokenCost = 1 },
+        new Upgrade { id = "move_speed",      displayName = "Move Speed",      description = "+1 move speed per level",        maxLevel = 5, baseValue = 8f,   valuePerLevel = 1f,   tokenCost = 1 },
+        new Upgrade { id = "acceleration",    displayName = "Acceleration",    description = "+5 acceleration per level",      maxLevel = 5, baseValue = 20f,  valuePerLevel = 5f,   tokenCost = 1 },
+        new Upgrade { id = "jump_force",      displayName = "Jump Force",      description = "+2 jump force per level",        maxLevel = 5, baseValue = 5f,   valuePerLevel = 2f,   tokenCost = 1 },
+        new Upgrade { id = "max_jumps",       displayName = "Extra Jump",      description = "+1 max jump per level",          maxLevel = 3, baseValue = 1f,   valuePerLevel = 1f,   tokenCost = 2 },
+        new Upgrade { id = "magnet_strength", displayName = "Magnet Strength", description = "+100 magnet strength per level", maxLevel = 5, baseValue = 500f, valuePerLevel = 100f, tokenCost = 1 },
+        new Upgrade { id = "magnet_range",    displayName = "Magnet Range",    description = "+3 magnet range per level",      maxLevel = 5, baseValue = 20f,  valuePerLevel = 3f,   tokenCost = 1 },
+        new Upgrade { id = "magnet_toggle",   displayName = "Magnet Toggle",   description = "Unlock magnet on/off toggle",    maxLevel = 1, baseValue = 0f,   valuePerLevel = 1f,   tokenCost = 3 },
+    };
+
+    private bool menuOpen = false;
+    private Coroutine regenRoutine;
+    private List<GameObject> spawnedButtons = new List<GameObject>();
 
     void Awake()
     {
+        if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
     }
 
-    void OnEnable()
+    void Start()
     {
-        if (ScoreManager.Instance != null)
-            ScoreManager.Instance.onLevelUp.AddListener(OnLevelUp);
-    }
+        //LoadUpgrades();
+        ApplyAll();
+        StartRegenLoop();
 
-    void OnDisable()
-    {
-        if (ScoreManager.Instance != null)
-            ScoreManager.Instance.onLevelUp.RemoveListener(OnLevelUp);
-    }
-
-    void OnLevelUp(int level)
-    {
-        tokens += 1;
-        Debug.Log($"Got token! Total: {tokens}");
-    }
-
-    void OnTokenSpend()
-    {
-        if(tokens == 0)
+        if (upgradeMenuRoot != null)
+            upgradeMenuRoot.SetActive(false);
+        if(upgradeMenuRoot == null)
         {
-            PlayCanvas.SetActive(true);
-            UpgradeCanvas.SetActive(false);
-            mouseUnlocker.LockMouse();
+            Debug.Log("UPGRADE MENY NULL");
         }
-        else
-            return;
     }
 
-    // ✅ FIXED: now uses cost
-    bool TrySpend(int cost)
-    {
-        if (tokens < cost)
-            return false;
+    // ── Menu ───────────────────────────────────────────────────────
 
-        tokens -= cost;
+    public void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.B))
+        {
+            ToggleUpgradeMenu();
+        }
+    }
+
+    public void ToggleUpgradeMenu()
+    {
+        menuOpen = !menuOpen;
+        upgradeMenuRoot.SetActive(menuOpen);
+
+        
+        // Pause / unpause time
+        Time.timeScale = menuOpen ? 0f : 1f;
+
+        Cursor.lockState = menuOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible   = menuOpen;
+
+        if (menuOpen)
+            RefreshUI();
+    }
+
+    void RefreshUI()
+    {
+        // Clear old buttons
+        foreach (var b in spawnedButtons)
+            if (b != null) Destroy(b);
+        spawnedButtons.Clear();
+
+        // Token count
+        if (tokenCountText != null && scoreManager != null)
+            tokenCountText.text = $"Tokens: {scoreManager.Tokens}";
+
+        // Spawn one button per upgrade
+        foreach (var upgrade in upgrades)
+        {
+            GameObject entry = Instantiate(upgradeButtonPrefab, upgradeButtonContainer);
+            spawnedButtons.Add(entry);
+
+            // Find text fields by name — set up your prefab with these child names
+            TextMeshProUGUI nameText  = entry.transform.Find("NameText") ?.GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI descText  = entry.transform.Find("DescText") ?.GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI levelText = entry.transform.Find("LevelText")?.GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI costText  = entry.transform.Find("CostText") ?.GetComponent<TextMeshProUGUI>();
+            Button          button    = entry.GetComponentInChildren<Button>();
+
+            if (nameText  != null) nameText.text  = upgrade.displayName;
+            if (descText  != null) descText.text  = upgrade.description;
+            if (levelText != null) levelText.text = upgrade.IsMaxed
+                                                    ? "MAX"
+                                                    : $"Level {upgrade.currentLevel} / {upgrade.maxLevel}";
+            if (costText  != null) costText.text  = upgrade.IsMaxed
+                                                    ? "-"
+                                                    : $"{upgrade.tokenCost} token(s)";
+
+            if (button != null)
+            {
+                bool canAfford = scoreManager != null && scoreManager.Tokens >= upgrade.tokenCost;
+                button.interactable = !upgrade.IsMaxed && canAfford;
+
+                string capturedId = upgrade.id;
+                button.onClick.AddListener(() =>
+                {
+                    TryPurchase(capturedId);
+                    RefreshUI(); // refresh after purchase
+                });
+            }
+        }
+    }
+
+    // ── Purchase ───────────────────────────────────────────────────
+
+    public bool TryPurchase(string id)
+    {
+        Upgrade upgrade = GetUpgrade(id);
+        if (upgrade == null)  return false;
+        if (upgrade.IsMaxed)  return false;
+        if (scoreManager == null) return false;
+
+        if (scoreManager.Tokens < upgrade.tokenCost)
+        {
+            Debug.Log($"Not enough tokens. Need {upgrade.tokenCost}, have {scoreManager.Tokens}");
+            return false;
+        }
+
+        scoreManager.SpendTokens(upgrade.tokenCost);
+        upgrade.currentLevel++;
+
+        ApplyUpgrade(upgrade);
+        SaveUpgrades();
+
+        Debug.Log($"Upgraded {upgrade.displayName} to level {upgrade.currentLevel}");
         return true;
     }
 
-    // ─────────────────────────────
-    // UPGRADES
-    // ─────────────────────────────
-
-    public void UpgradeMaxHealth(int cost)
+    public Upgrade GetUpgrade(string id)
     {
-        if (!TrySpend(cost)) return;
-
-        maxHealthLevel++;
-        health.SetMaxHealth(health.maxHealth += 10);
-        OnTokenSpend();
+        foreach (var u in upgrades)
+            if (u.id == id) return u;
+        return null;
     }
 
-    public void UpgradeRegen(int cost)
+    // ── Apply ──────────────────────────────────────────────────────
+
+    void ApplyAll()
     {
-        if (!TrySpend(cost)) return;
-
-        regenLevel++;
-
-        CancelInvoke(nameof(RegenTick));
-        regenAmount =+ 1;
-
-        InvokeRepeating(nameof(RegenTick), 1f, 1f);
-        OnTokenSpend();
+        foreach (var u in upgrades)
+            ApplyUpgrade(u);
     }
 
-    float regenAmount;
-
-    void RegenTick()
+    void ApplyUpgrade(Upgrade u)
     {
-        health.Heal(regenAmount);
+        switch (u.id)
+        {
+            case "max_health":
+                if (playerHealth != null)
+                    playerHealth.SetMaxHealth(u.CurrentValue);
+                break;
+
+            case "health_regen":
+                StartRegenLoop();
+                break;
+
+            case "move_speed":
+                if (playerController != null)
+                    playerController.moveSpeed = u.CurrentValue;
+                break;
+
+            case "acceleration":
+                if (playerController != null)
+                    playerController.acceleration = u.CurrentValue;
+                break;
+
+            case "jump_force":
+                if (playerController != null)
+                    playerController.jumpForce = u.CurrentValue;
+                break;
+
+            case "max_jumps":
+                if (playerController != null)
+                    playerController.MaxJump = (int)u.CurrentValue;
+                break;
+
+            case "magnet_strength":
+                if (magnetController != null)
+                    magnetController.magneticStrength = u.CurrentValue;
+                break;
+
+            case "magnet_range":
+                if (magnetController != null)
+                    magnetController.range = u.CurrentValue;
+                break;
+
+            case "magnet_toggle":
+                // unlocked — PlayerController checks this before allowing toggle
+                break;
+        }
     }
 
-    public void UpgradeJumpForce(int cost)
-    {
-        if (!TrySpend(cost)) return;
+    // ── Regen ──────────────────────────────────────────────────────
 
-        jumpForceLevel++;
-        player.jumpForce += 10;
-        OnTokenSpend();
+    void StartRegenLoop()
+    {
+        if (regenRoutine != null)
+            StopCoroutine(regenRoutine);
+
+        Upgrade regen = GetUpgrade("health_regen");
+        if (regen == null || regen.currentLevel == 0) return;
+
+        regenRoutine = StartCoroutine(RegenTick(regen));
     }
 
-    public void UpgradeMaxJumps(int cost, int amount)
+    IEnumerator RegenTick(Upgrade regen)
     {
-        if (!TrySpend(cost)) return;
-
-        maxJumpsLevel++;
-        player.MaxJump += 1;
-        OnTokenSpend();
+        while (true)
+        {
+            yield return new WaitForSeconds(regenTickRate);
+            if (playerHealth != null)
+                playerHealth.Heal(regen.CurrentValue);
+        }
     }
 
-    public void UpgradeMoveSpeed(int cost)
-    {
-        if (!TrySpend(cost)) return;
+    // ── Save / Load ────────────────────────────────────────────────
 
-        moveSpeedLevel++;
-        player.moveSpeed += 10;
-        OnTokenSpend();
+    void SaveUpgrades()
+    {
+        foreach (var u in upgrades)
+            PlayerPrefs.SetInt("Upgrade_" + u.id, u.currentLevel);
+        PlayerPrefs.Save();
     }
 
-    public void UpgradeAcceleration(int cost)
+    void LoadUpgrades()
     {
-        if (!TrySpend(cost)) return;
-
-        accelerationLevel++;
-        player.acceleration += 15;
-        OnTokenSpend();
+        foreach (var u in upgrades)
+            u.currentLevel = PlayerPrefs.GetInt("Upgrade_" + u.id, 0);
     }
 
-    public void UpgradeMagnetStrength(int cost)
+    public void ResetUpgrades()
     {
-        if (!TrySpend(cost)) return;
-
-        magnetStrengthLevel++;
-        magnet.magneticStrength += 50;
-        OnTokenSpend();
-    }
-
-    public void UpgradeMagnetRange(int cost)
-    {
-        if (!TrySpend(cost)) return;
-
-        magnetRangeLevel++;
-        magnet.range += 10;
-        OnTokenSpend();
-    }
-
-    public void UnlockMagnet(int cost)
-    {
-        if (magnetUnlockLevel > 0) return;
-
-        if (!TrySpend(cost)) return;
-
-        magnetUnlockLevel = 1;
-        magnet.currentEnabled = MagnetController.Enabled.ON;
-        OnTokenSpend();
+        foreach (var u in upgrades)
+        {
+            u.currentLevel = 0;
+            PlayerPrefs.DeleteKey("Upgrade_" + u.id);
+        }
+        PlayerPrefs.Save();
+        ApplyAll();
     }
 }
