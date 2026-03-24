@@ -28,6 +28,11 @@ public class ImpactDamage : MonoBehaviour
     public float mediumHitThreshold = 15f;
     // anything above medium = Big
 
+    [Header("Sound Cooldowns")]
+    public float smallHitSoundCooldown  = 0.15f;
+    public float mediumHitSoundCooldown = 0.4f;
+    public float bigHitSoundCooldown    = 0.6f;
+
     [Header("Tag-Based Settings")]
     public List<TagImpactSettings> tagSettings = new List<TagImpactSettings>();
 
@@ -67,23 +72,36 @@ public class ImpactDamage : MonoBehaviour
 
     void HandleHitEffect(HitStrength strength, Vector3 point, Vector3 normal)
     {
-        // This is your expansion point
-
         switch (strength)
         {
             case HitStrength.Small:
-                Debug.Log("SMALL HIT");
-                // TODO: light particles, small sound
+                if (!AudioManager.Instance.IsSFXOnCooldown("SmallHit", smallHitSoundCooldown))
+                {
+                    AudioManager.Instance.PlaySFX3D("SmallHit", this.gameObject, 5f, 20f);
+                    AudioManager.Instance.RegisterSFXPlayed("SmallHit");
+                }
+                lastHitTime = Time.time + smallHitSoundCooldown;
+                // TODO: light particles
                 break;
 
             case HitStrength.Medium:
-                Debug.Log("MEDIUM HIT");
-                // TODO: medium VFX, stronger sound
+                if (!AudioManager.Instance.IsSFXOnCooldown("MediumHit", mediumHitSoundCooldown))
+                {
+                    AudioManager.Instance.PlaySFX3D("MediumHit", this.gameObject, 5f, 20f);
+                    AudioManager.Instance.RegisterSFXPlayed("MediumHit");
+                }
+                lastHitTime = Time.time + mediumHitSoundCooldown;
+                // TODO: medium VFX
                 break;
 
             case HitStrength.Big:
-                Debug.Log("BIG HIT");
-                // TODO: heavy VFX, screen shake, decals
+                if (!AudioManager.Instance.IsSFXOnCooldown("BigHit", bigHitSoundCooldown))
+                {
+                    AudioManager.Instance.PlaySFX3D("BigHit", this.gameObject, 5f, 25f);
+                    AudioManager.Instance.RegisterSFXPlayed("BigHit");
+                }
+                lastHitTime = Time.time + bigHitSoundCooldown;
+                // TODO: heavy VFX, screen shake
                 break;
         }
     }

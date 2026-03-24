@@ -51,8 +51,13 @@ MonoBehaviour:
     clip: {fileID: 0}
     useRandomPitch: 0
     pitchRange: {x: 0, y: 0}
-  sfxSounds: []
-  uiButtonSounds: []
+  sfxSounds:
+  - name: MediumHit
+    clip: {fileID: 8300000, guid: 825aa255b79a25b499316d9d9773e88b, type: 3}
+    useRandomPitch: 1
+    pitchRange: {x: 0.8, y: 1.5}
+  uiButtonSounds:
+  - {fileID: 8300000, guid: 53c73537429e9ba408dcd6d6340e9a99, type: 3}
   musicSource: {fileID: 3004012427389493719}
   sfxSource: {fileID: 4921392757249670357}
   audioMixer: {fileID: 24100000, guid: 7eb39c4b06a25de4e8a44cd987064223, type: 2}

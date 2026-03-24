@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -173,6 +174,20 @@ public class AudioManager : MonoBehaviour
 
         source.Play();
         Destroy(source, s.clip.length / source.pitch);
+    }
+
+    private Dictionary<string, float> sfxCooldowns = new Dictionary<string, float>();
+
+    public bool IsSFXOnCooldown(string name, float cooldown)
+    {
+        if (sfxCooldowns.TryGetValue(name, out float lastTime))
+            return Time.time < lastTime + cooldown;
+        return false;
+    }
+
+    public void RegisterSFXPlayed(string name)
+    {
+        sfxCooldowns[name] = Time.time;
     }
 
     public void PlaySFX3D(string name, GameObject target, float minRange, float maxRange)

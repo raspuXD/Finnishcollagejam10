@@ -178,21 +178,27 @@ MonoBehaviour:
   baseDamageMultiplier: 2
   maxDamage: 100000
   hitCooldown: 0.1
-  smallHitThreshold: 5
-  mediumHitThreshold: 15
+  smallHitThreshold: 15
+  mediumHitThreshold: 35
+  smallHitSoundCooldown: 0.15
+  mediumHitSoundCooldown: 0.4
+  bigHitSoundCooldown: 0.6
   tagSettings:
   - tag: Wall
-    minVelocity: 8
+    minVelocity: 10
     damageMultiplier: 1.75
   - tag: Floor
-    minVelocity: 10
+    minVelocity: 15
     damageMultiplier: 1.5
   - tag: Prop
     minVelocity: 2
-    damageMultiplier: 2.5
+    damageMultiplier: 10
   - tag: Enemy
     minVelocity: 20
     damageMultiplier: 1.5
+  - tag: Spike
+    minVelocity: 1
+    damageMultiplier: 10
 --- !u!114 &163103066457615744
 MonoBehaviour:
   m_ObjectHideFlags: 0
