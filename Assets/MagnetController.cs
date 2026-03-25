@@ -158,9 +158,25 @@ public class MagnetController : MonoBehaviour
 
             Vector3 dir = toCenter.normalized;
 
-            bool attract = metal.usePolarity
-                ? currentPolarity != metal.polarity
-                : currentPolarity == MagnetPolarity.Attract;
+            bool attract;
+
+            if (metal.usePolarity)
+            {
+                if (metal.objectType == MetalObject.ObjectType.Prop)
+                {
+                    // PROPS: same polarity attracts
+                    attract = currentPolarity == metal.polarity;
+                }
+                else // Enemy
+                {
+                    // ENEMIES: opposite polarity attracts
+                    attract = currentPolarity != metal.polarity;
+                }
+            }
+            else
+            {
+                attract = currentPolarity == MagnetPolarity.Attract;
+            }
 
             Vector3 forceDir       = attract ? dir : -dir;
             float targetStrength   = metal.magneticStrength;

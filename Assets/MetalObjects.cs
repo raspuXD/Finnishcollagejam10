@@ -20,14 +20,36 @@ public class MetalObject : MonoBehaviour
 
     [HideInInspector] public Rigidbody rb;
 
+    Renderer rend;
+    MaterialPropertyBlock mpb;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        rend = GetComponent<Renderer>();
+        mpb = new MaterialPropertyBlock();
     }
 
     void FixedUpdate()
     {
         ApplyMagnetism();
+        UpdateShader();
+    }
+
+    void UpdateShader()
+    {
+        rend.GetPropertyBlock(mpb);
+
+        // Polarity value (-1 or +1)
+        float polarityValue = polarity == MagnetPolarity.Attract ? -1f : 1f;
+
+        // Tint strength ONLY when polarity is used
+        float tint = usePolarity ? 0.3f : 0f;
+
+        mpb.SetFloat("_Polarity", polarityValue);
+        mpb.SetFloat("_TintStrength", tint);
+
+        rend.SetPropertyBlock(mpb);
     }
 
     void ApplyMagnetism()
@@ -48,11 +70,15 @@ public class MetalObject : MonoBehaviour
 
             Vector3 dir = toOther.normalized;
 
-            // ONLY interact if BOTH use polarity
             if (!usePolarity || !other.usePolarity)
                 continue;
 
-            bool attract = polarity != other.polarity;
+            bool attract;
+
+            if (objectType == ObjectType.Prop || other.objectType == ObjectType.Prop)
+                attract = polarity == other.polarity;
+            else
+                attract = polarity != other.polarity;
 
             Vector3 forceDir = attract ? dir : -dir;
 
