@@ -210,15 +210,15 @@ MonoBehaviour:
   enemyAttractPrefab: {fileID: 2906660386499044594, guid: f63cd84f02ec95f40b2250093e8cf0af, type: 3}
   enemyRepelPrefab: {fileID: 3174796972935891430, guid: e33ef43a234b9cf4abb4af3320963fc6, type: 3}
   propVariants:
-  - name: Plank
-    noPolarityPrefab: {fileID: 4415597275609397738, guid: 9d9963cd8310d19429d69df933a6ef32, type: 3}
-    attractPrefab: {fileID: 2239561132174138833, guid: c323a83dd37366d47a8da63bf9b1e901, type: 3}
-    repelPrefab: {fileID: 2086221856814591, guid: 2894e1b2491709143be7dec4e9aa056b, type: 3}
-    spawnWeight: 0
   - name: Box
     noPolarityPrefab: {fileID: 3574891692986865016, guid: 0da6cc9c9709f534898d6bf99558e4df, type: 3}
     attractPrefab: {fileID: 3459614761677979748, guid: 8bee9dfe623ccaf4a98a6af045e0df9a, type: 3}
     repelPrefab: {fileID: 6423379780222005250, guid: 027af8ed15352ae4cacc5e66d67e72f5, type: 3}
+    spawnWeight: 0
+  - name: Plank
+    noPolarityPrefab: {fileID: 4415597275609397738, guid: 9d9963cd8310d19429d69df933a6ef32, type: 3}
+    attractPrefab: {fileID: 2239561132174138833, guid: c323a83dd37366d47a8da63bf9b1e901, type: 3}
+    repelPrefab: {fileID: 2086221856814591, guid: 2894e1b2491709143be7dec4e9aa056b, type: 3}
     spawnWeight: 0
   spawnRadius: 28.3
   minSpawnDistance: 16.6
@@ -3164,7 +3164,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -26.46, y: 0.97, z: -24.71}
-  m_LocalScale: {x: 1, y: 2.0139, z: 2.658}
+  m_LocalScale: {x: 7.2167, y: 2.0139, z: 7.6579638}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -4708,7 +4708,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44f0b8db6c7e2644fab8db7bdf6bdc5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 100
+  maxHealth: 10000
   currentHealth: 0
   regenDelay: 4
   regenRate: 0
@@ -4792,14 +4792,17 @@ MonoBehaviour:
   bigHitSoundCooldown: 0.6
   tagSettings:
   - tag: Wall
-    minVelocity: 10
-    damageMultiplier: 1.25
-  - tag: Floor
     minVelocity: 20
     damageMultiplier: 1.25
+  - tag: Floor
+    minVelocity: 25
+    damageMultiplier: 1.25
   - tag: Spike
-    minVelocity: 1
+    minVelocity: 5
     damageMultiplier: 2
+  - tag: Enemy
+    minVelocity: 15
+    damageMultiplier: 1.5
 --- !u!114 &5740807261132676991
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -20,7 +20,7 @@ GameObject:
   - component: {fileID: 2953108326835069778}
   m_Layer: 0
   m_Name: AttractEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -175,7 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60fd1c9a531529141acba9b48da5fa65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ImpactDamage
-  baseDamageMultiplier: 2
+  baseDamageMultiplier: 1
   maxDamage: 100000
   hitCooldown: 0.1
   smallHitThreshold: 15

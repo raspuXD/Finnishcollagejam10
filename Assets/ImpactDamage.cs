@@ -107,90 +107,95 @@ public class ImpactDamage : MonoBehaviour
     }
 
     void OnCollisionEnter(Collision collision)
+{
+    if (Time.time < lastHitTime + hitCooldown)
+        return;
+
+    string hitTag = collision.collider.tag;
+
+    float velocityBefore   = lastVelocity.magnitude;
+    float relativeVelocity = collision.relativeVelocity.magnitude;
+    float velocityLoss     = velocityBefore - relativeVelocity;
+
+    TagImpactSettings tagSetting = GetTagSettings(hitTag);
+
+    float minVelocity   = tagSetting != null ? tagSetting.minVelocity    : 0f;
+    float tagMultiplier = tagSetting != null ? tagSetting.damageMultiplier : 1f;
+
+    ContactPoint contact          = collision.contacts[0];
+    Vector3      normal           = contact.normal;
+    float        alignment        = Vector3.Dot(lastVelocity.normalized, -normal);
+    float        alignmentMultiplier = Mathf.Clamp01((alignment - 0.3f) * 2f);
+
+    float damage = velocityLoss * baseDamageMultiplier * tagMultiplier * alignmentMultiplier;
+    damage = Mathf.Clamp(damage, 0f, maxDamage);
+
+    // ── PROP ────────────────────────────────────────────────────────
+    if (magnetObject != null && magnetObject.objectType == MetalObject.ObjectType.Prop)
     {
-        if (Time.time < lastHitTime + hitCooldown)
-            return;
+        if (velocityLoss      < minVelocity) return;
+        if (relativeVelocity  < minVelocity) return;
+        if (alignmentMultiplier <= 0f)        return;
 
-        string hitTag = collision.collider.tag;
-        
-        float velocityBefore = lastVelocity.magnitude;
-        float relativeVelocity = collision.relativeVelocity.magnitude;
-        float velocityLoss = velocityBefore - relativeVelocity;
-
-        TagImpactSettings tagSetting = GetTagSettings(collision.collider.tag);
-
-        float minVelocity = tagSetting != null ? tagSetting.minVelocity : 0f;
-        float tagMultiplier = tagSetting != null ? tagSetting.damageMultiplier : 1f;
-
-        ContactPoint contact = collision.contacts[0];
-        Vector3 normal = contact.normal;
-
-        float alignment = Vector3.Dot(lastVelocity.normalized, -normal);
-        float alignmentMultiplier = Mathf.Clamp01((alignment - 0.3f) * 2f);
-
-        float damage = velocityLoss * baseDamageMultiplier * tagMultiplier * alignmentMultiplier;
-        damage = Mathf.Clamp(damage, 0f, maxDamage);
-
-        // -------------------------
-        // PROP → STRICT FILTER
-        // -------------------------
-        if (magnetObject != null && magnetObject.objectType == MetalObject.ObjectType.Prop)
+        // Prop hits enemy
+        EnemyHealth enemy = collision.collider.GetComponent<EnemyHealth>();
+        if (enemy != null)
         {
-            if (velocityLoss < minVelocity) return;
-            if (relativeVelocity < minVelocity) return;
-            if (alignmentMultiplier <= 0f) return;
-
-            EnemyHealth enemy = collision.collider.GetComponent<EnemyHealth>();
-            if (enemy != null)
-            {
-                enemy.TakeDamage(damage, hitTag);
-
-                // HIT EFFECT
-                HitStrength strength = GetHitStrength(damage);
-                HandleHitEffect(strength, contact.point, normal);
-
-                if (alignment < 0.6f)
-                    lastHitTime = Time.time + 0.2f;
-                else
-                    lastHitTime = Time.time;
-
-                Debug.Log("ENEMY DAMAGE: " + damage);
-            }
-
+            enemy.TakeDamage(damage, hitTag);
+            HitStrength strength = GetHitStrength(damage);
+            HandleHitEffect(strength, contact.point, normal);
+            lastHitTime = alignment < 0.6f ? Time.time + 0.2f : Time.time;
+            Debug.Log("PROP HIT ENEMY: " + damage);
             return;
         }
 
-        // -------------------------
-        // ENEMY → LOOSE FILTER
-        // -------------------------
-        if (magnetObject != null && magnetObject.objectType == MetalObject.ObjectType.Enemy)
+        // Prop hits player
+        PlayerHealth player = collision.collider.GetComponent<PlayerHealth>();
+        if (player != null)
         {
-            if (collision.collider.GetComponent<PlayerHealth>() != null)
-                return;
+            player.TakeDamage(damage, "Prop");
+            HitStrength strength = GetHitStrength(damage);
+            HandleHitEffect(strength, contact.point, normal);
+            lastHitTime = Time.time;
+            Debug.Log("PROP HIT PLAYER: " + damage);
+            return;
+        }
 
-            float enemyVelocity = lastVelocity.magnitude;
-            if (enemyVelocity < minVelocity)
-                return;
+        return;
+    }
 
-            float enemyDamage = enemyVelocity * baseDamageMultiplier * tagMultiplier * 0.5f;
-            enemyDamage *= alignmentMultiplier;
-            enemyDamage = Mathf.Clamp(enemyDamage, 0f, maxDamage);
+    // ── ENEMY ────────────────────────────────────────────────────────
+    if (magnetObject != null && magnetObject.objectType == MetalObject.ObjectType.Enemy)
+    {
+        float enemyVelocity = lastVelocity.magnitude;
+        if (enemyVelocity < minVelocity) return;
 
-            EnemyHealth self = GetComponent<EnemyHealth>();
-            if (self != null)
-            {
-                self.TakeDamage(enemyDamage, collision.gameObject.tag);
+        float enemyDamage = enemyVelocity * baseDamageMultiplier * tagMultiplier * 0.5f
+                            * alignmentMultiplier;
+        enemyDamage = Mathf.Clamp(enemyDamage, 0f, maxDamage);
 
-                // HIT EFFECT
-                HitStrength strength = GetHitStrength(enemyDamage);
-                HandleHitEffect(strength, contact.point, normal);
+        // Enemy hits player
+        PlayerHealth player = collision.collider.GetComponent<PlayerHealth>();
+        if (player != null)
+        {
+            player.TakeDamage(enemyDamage, "Enemy");
+            HitStrength strength = GetHitStrength(enemyDamage);
+            HandleHitEffect(strength, contact.point, normal);
+            lastHitTime = Time.time;
+            Debug.Log("ENEMY HIT PLAYER: " + enemyDamage);
+            return;
+        }
 
-                if (alignment < 0.6f)
-                    lastHitTime = Time.time + 0.2f;
-                else
-                    lastHitTime = Time.time;
-
-            }
+        // Enemy hits environment — damages itself
+        EnemyHealth self = GetComponent<EnemyHealth>();
+        if (self != null)
+        {
+            self.TakeDamage(enemyDamage, hitTag);
+            HitStrength strength = GetHitStrength(enemyDamage);
+            HandleHitEffect(strength, contact.point, normal);
+            lastHitTime = alignment < 0.6f ? Time.time + 0.2f : Time.time;
+            Debug.Log("ENEMY HIT ENVIRONMENT: " + enemyDamage);
         }
     }
+}
 }
