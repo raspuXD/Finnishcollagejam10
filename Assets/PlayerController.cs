@@ -70,7 +70,13 @@ public class PlayerController : MonoBehaviour
         Vector3 velocity       = rb.linearVelocity;
         Vector3 velocityChange = targetVelocity - new Vector3(velocity.x, 0, velocity.z);
 
-        rb.AddForce(velocityChange * acceleration * controlMultiplier, ForceMode.Acceleration);
+        if (controlMultiplier > 0.05f)
+        {
+            rb.AddForce(
+                velocityChange * acceleration * controlMultiplier,
+                ForceMode.Acceleration
+            );
+        }
     }
 
     public void OnMove(InputValue value)

@@ -25,6 +25,8 @@ public class MagnetController : MonoBehaviour
     private Rigidbody rb;
     private PlayerController playerController;
 
+    public float externalDisableUntil = 0f;
+
     [Header("Visuals")]
     public Renderer targetRenderer;
     public Gradient attractGradient;
@@ -135,6 +137,9 @@ public class MagnetController : MonoBehaviour
 
     void ApplyMagnetism()
     {
+        if (Time.time < externalDisableUntil)
+        return;
+        
         Collider[] hits    = Physics.OverlapSphere(transform.position, range);
         
         bool magnetActive  = false;

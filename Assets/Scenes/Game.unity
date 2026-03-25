@@ -5672,6 +5672,7 @@ MonoBehaviour:
   playerControlInRange: 0.3
   controlLoseSpeed: 5
   controlRecoverSpeed: 3
+  launchDisableTime: 0.25
   launchForce: 25
   launchControlCutoff: 0.1
   launchCooldown: 0.5
@@ -5742,8 +5743,9 @@ MonoBehaviour:
   playerControlInRange: 0.3
   controlLoseSpeed: 5
   controlRecoverSpeed: 1
-  launchForce: 2000
-  launchControlCutoff: 0.1
+  launchDisableTime: 0.25
+  launchForce: 55
+  launchControlCutoff: 2
   launchCooldown: 0.5
   useFalloff: 0
   falloffPower: 2
@@ -6498,6 +6500,7 @@ MonoBehaviour:
   currentPolarity: 1
   currentEnabled: 0
   animator: {fileID: 498674640}
+  externalDisableUntil: 0
   targetRenderer: {fileID: 610070846413388932}
   attractGradient:
     serializedVersion: 2

@@ -17,6 +17,10 @@ public class EnvironmentalMagnet : MonoBehaviour
     public float controlLoseSpeed     = 5f;
     public float controlRecoverSpeed  = 3f;
 
+    [Header("Launch Override")]
+    public float launchDisableTime = 0.25f;
+    private float launchDisableUntil = 0f;
+
     [Header("Polarity Switch Launch")]
     public float launchForce         = 25f;   // burst force when player switches to matching polarity
     public float launchControlCutoff = 0.1f;  // control drops to this on launch
@@ -79,14 +83,15 @@ public class EnvironmentalMagnet : MonoBehaviour
 
             return;
         }
-
-        CheckPolaritySwitch();
     }
 
     void CheckPolaritySwitch()
     {
         if (playerMagnet == null || playerRb == null) return;
-        if (!playerInRange) return;
+
+        float distance = Vector3.Distance(transform.position, playerRb.position);
+        if (distance > range) return;
+
         if (Time.time < lastLaunchTime + launchCooldown) return;
 
         bool magnetOn      = playerMagnet.currentEnabled == MagnetController.Enabled.ON;
@@ -111,31 +116,14 @@ public class EnvironmentalMagnet : MonoBehaviour
 
     void LaunchPlayer()
     {
-        if (playerRb == null) return;
+        Vector3 dir = (playerRb.position - transform.position).normalized;
 
-        Vector3 toPlayer = playerRb.position - transform.position;
-        float   distance = toPlayer.magnitude;
-        if (distance < 0.1f) return;
+        float finalForce = launchForce;
 
-        Vector3 dir = toPlayer.normalized;
-
-        // Scale launch with proximity — closer = stronger burst
-        float proximityFactor = 1f - Mathf.Clamp01(distance / range);
-        float finalForce      = proximityFactor * launchForce;
-
-        // Kill current velocity toward the magnet first so launch feels clean
-        Vector3 inwardVelocity = Vector3.Project(playerRb.linearVelocity, -dir);
-        playerRb.linearVelocity -= inwardVelocity;
-
+        playerRb.linearVelocity = Vector3.zero;
         playerRb.AddForce(dir * finalForce, ForceMode.Impulse);
 
-        // Drop control so player gets launched without movement fighting the burst
-        if (playerController != null)
-            playerController.controlMultiplier = launchControlCutoff;
-
-        lastLaunchTime = Time.time;
-
-        Debug.Log($"[EnvMagnet] Launch! force={finalForce:F1} distance={distance:F1}");
+        Debug.Log("LAUNCH FORCE USED: " + finalForce);
     }
 
     void FixedUpdate()
@@ -143,6 +131,7 @@ public class EnvironmentalMagnet : MonoBehaviour
         HandlePulse();
         ApplyMagnetism();
         HandlePlayerControl();
+        CheckPolaritySwitch();
     }
 
     void HandlePlayerControl()
@@ -191,6 +180,8 @@ public class EnvironmentalMagnet : MonoBehaviour
 
     void ApplyMagnetism()
     {
+        if (Time.time < launchDisableUntil)
+        return;
         Collider[] hits = Physics.OverlapSphere(transform.position, range);
 
         foreach (Collider hit in hits)
