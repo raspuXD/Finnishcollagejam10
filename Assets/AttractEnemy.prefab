@@ -256,3 +256,11 @@ MonoBehaviour:
   controlLoseSpeed: 10
   controlRecoverSpeed: 5
   recoverSpeedThreshold: 4
+  wallCheckDistance: 0.8
+  wallClimbSpeed: 4
+  wallGravityScale: 0.05
+  wallAttachForce: 25
+  wallDetectAngle: 60
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128

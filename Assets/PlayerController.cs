@@ -24,8 +24,13 @@ public class PlayerController : MonoBehaviour
     [Header("Keybinds")]
     public KeyCode magnetToggleKey = KeyCode.Q;
 
+    [Header("Sprint")]
+    public float sprintSpeedBonus = 5f;   // added on top of moveSpeed when sprinting
+    [SerializeField] private bool isSprinting = false;
+
     private Vector2 moveInput;
     private Rigidbody rb;
+
     [Header("Magnetism")]
     public MagnetPolarity polarity = MagnetPolarity.Repel;
 
@@ -38,15 +43,9 @@ public class PlayerController : MonoBehaviour
         if (cameraTransform == null)
             cameraTransform = Camera.main.transform;
 
-        rb.linearDamping   = drag;
-        rb.angularDamping  = 0.5f;
+        rb.linearDamping  = drag;
+        rb.angularDamping = 0.5f;
     }
-    /*
-    void Update()
-    {
-        if (Input.GetKeyDown(magnetToggleKey))
-            OnToggleMagnet();
-    }*/
 
     void FixedUpdate()
     {
@@ -65,18 +64,15 @@ public class PlayerController : MonoBehaviour
         forward.Normalize();
         right.Normalize();
 
-        Vector3 move           = forward * moveInput.y + right * moveInput.x;
-        Vector3 targetVelocity = move * moveSpeed;
+        Vector3 move = forward * moveInput.y + right * moveInput.x;
+
+        float currentSpeed     = isSprinting ? moveSpeed + sprintSpeedBonus : moveSpeed;
+        Vector3 targetVelocity = move * currentSpeed;
         Vector3 velocity       = rb.linearVelocity;
         Vector3 velocityChange = targetVelocity - new Vector3(velocity.x, 0, velocity.z);
 
         if (controlMultiplier > 0.05f)
-        {
-            rb.AddForce(
-                velocityChange * acceleration * controlMultiplier,
-                ForceMode.Acceleration
-            );
-        }
+            rb.AddForce(velocityChange * acceleration * controlMultiplier, ForceMode.Acceleration);
     }
 
     public void OnMove(InputValue value)
@@ -93,11 +89,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Called automatically by Input System — bind a "Sprint" action to Left Shift
+   public void OnSprint(InputValue value)
+    {
+        isSprinting = value.isPressed;
+    }
+
     public void OnToggleMagnet()
     {
         if (magnetController == null) return;
 
-        // Block if upgrade not purchased
         if (upgradeManager != null)
         {
             Upgrade toggleUpgrade = upgradeManager.GetUpgrade("magnet_toggle");

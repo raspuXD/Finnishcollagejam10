@@ -41,15 +41,15 @@ public class UpgradeManager : MonoBehaviour
     [Header("Upgrades")]
     public List<Upgrade> upgrades = new List<Upgrade>()
     {
-        new Upgrade { id = "max_health",      displayName = "Max Health",      description = "+25 max health per level",       maxLevel = 5, baseValue = 100f, valuePerLevel = 25f,  tokenCost = 1 },
-        new Upgrade { id = "health_regen",    displayName = "Health Regen",    description = "+2 hp/sec per level",            maxLevel = 5, baseValue = 0f,   valuePerLevel = 2f,   tokenCost = 1 },
-        new Upgrade { id = "move_speed",      displayName = "Move Speed",      description = "+1 move speed per level",        maxLevel = 5, baseValue = 8f,   valuePerLevel = 1f,   tokenCost = 1 },
-        new Upgrade { id = "acceleration",    displayName = "Acceleration",    description = "+5 acceleration per level",      maxLevel = 5, baseValue = 20f,  valuePerLevel = 5f,   tokenCost = 1 },
-        new Upgrade { id = "jump_force",      displayName = "Jump Force",      description = "+2 jump force per level",        maxLevel = 5, baseValue = 5f,   valuePerLevel = 2f,   tokenCost = 1 },
-        new Upgrade { id = "max_jumps",       displayName = "Extra Jump",      description = "+1 max jump per level",          maxLevel = 3, baseValue = 1f,   valuePerLevel = 1f,   tokenCost = 2 },
-        new Upgrade { id = "magnet_strength", displayName = "Magnet Strength", description = "+100 magnet strength per level", maxLevel = 5, baseValue = 500f, valuePerLevel = 100f, tokenCost = 1 },
-        new Upgrade { id = "magnet_range",    displayName = "Magnet Range",    description = "+3 magnet range per level",      maxLevel = 5, baseValue = 20f,  valuePerLevel = 3f,   tokenCost = 1 },
-        new Upgrade { id = "magnet_toggle",   displayName = "Magnet Toggle",   description = "Unlock magnet on/off toggle",    maxLevel = 1, baseValue = 0f,   valuePerLevel = 1f,   tokenCost = 3 },
+        new Upgrade { id = "max_health",      displayName = "Max Health",      description = "+25 max health per level",         maxLevel = 5, baseValue = 100f, valuePerLevel = 25f,  tokenCost = 1 },
+        new Upgrade { id = "health_regen",    displayName = "Health Regen",    description = "+2 hp/sec per level",              maxLevel = 5, baseValue = 0f,   valuePerLevel = 2f,   tokenCost = 1 },
+        new Upgrade { id = "move_speed",      displayName = "Move Speed",      description = "+2 move speed, +4 sprint speed",   maxLevel = 5, baseValue = 8f,   valuePerLevel = 2f,   tokenCost = 1 },
+        new Upgrade { id = "acceleration",    displayName = "Acceleration",    description = "+5 acceleration per level",         maxLevel = 5, baseValue = 20f,  valuePerLevel = 5f,   tokenCost = 1 },
+        new Upgrade { id = "jump_force",      displayName = "Jump Force",      description = "+2 jump force per level",           maxLevel = 5, baseValue = 5f,   valuePerLevel = 2f,   tokenCost = 1 },
+        new Upgrade { id = "max_jumps",       displayName = "Extra Jump",      description = "+1 max jump per level",             maxLevel = 3, baseValue = 1f,   valuePerLevel = 1f,   tokenCost = 2 },
+        new Upgrade { id = "magnet_strength", displayName = "Magnet Strength", description = "+100 magnet strength per level",    maxLevel = 5, baseValue = 500f, valuePerLevel = 100f, tokenCost = 1 },
+        new Upgrade { id = "magnet_range",    displayName = "Magnet Range",    description = "+3 magnet range per level",         maxLevel = 5, baseValue = 20f,  valuePerLevel = 3f,   tokenCost = 1 },
+        new Upgrade { id = "magnet_toggle",   displayName = "Magnet Toggle",   description = "Unlock magnet on/off toggle",       maxLevel = 1, baseValue = 0f,   valuePerLevel = 1f,   tokenCost = 3 },
     };
 
     private bool menuOpen = false;
@@ -203,9 +203,12 @@ public class UpgradeManager : MonoBehaviour
                 break;
 
             case "move_speed":
-                if (playerController != null)
-                    playerController.moveSpeed = u.CurrentValue;
-                break;
+            if (playerController != null)
+            {
+                playerController.moveSpeed        = u.CurrentValue;         // +2 per level
+                playerController.sprintSpeedBonus = 5f + u.currentLevel * 4f; // 5 base + 4 per level
+            }
+            break;
 
             case "acceleration":
                 if (playerController != null)

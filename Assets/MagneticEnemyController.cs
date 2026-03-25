@@ -10,7 +10,7 @@ public class MagneticEnemyController : MonoBehaviour
     private MagnetController magnet;
 
     [Header("Movement")]
-    public float maxSpeed = 6f;
+    public float maxSpeed     = 6f;
     public float acceleration = 8f;
     public float extraGravity = 10f;
 
@@ -22,13 +22,24 @@ public class MagneticEnemyController : MonoBehaviour
     public float airDrag = 0.2f;
 
     [Header("Magnetic Control")]
-    public float insideControl = 0.05f;      // tiny control inside field
-    public float controlLoseSpeed = 10f;      // fast drop when entering field
-    public float controlRecoverSpeed = 0.5f;  // slow regain after slowing down
-    public float recoverSpeedThreshold = 4f;  // must be below this speed to recover
+    public float insideControl        = 0.05f;
+    public float controlLoseSpeed     = 10f;
+    public float controlRecoverSpeed  = 0.5f;
+    public float recoverSpeedThreshold = 4f;
+
+    [Header("Wall Climbing")]
+    public float wallCheckDistance    = 0.8f;
+    public float wallClimbSpeed       = 4f;
+    public float wallGravityScale     = 0.1f;
+    public float wallAttachForce      = 15f;
+    public float wallDetectAngle      = 60f;
+    public LayerMask wallLayer;
 
     private Rigidbody rb;
-    private bool isGrounded;
+    private bool  isGrounded;
+    private bool  isOnWall;
+    private Vector3 wallNormal;
+    private Vector3 wallSurfaceUp;
 
     private float controlFactor = 1f;
 
@@ -52,17 +63,13 @@ public class MagneticEnemyController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (player == null || magnet == null)
-            return;
+        if (player == null || magnet == null) return;
 
         CheckGround();
+        CheckWall();
 
-        bool inMagnetRange = IsInMagnetRange();
-
-        rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
-
-        // Use total velocity so fast vertical falls also block recovery
-        float currentSpeed = rb.linearVelocity.magnitude;
+        bool inMagnetRange  = IsInMagnetRange();
+        float currentSpeed  = rb.linearVelocity.magnitude;
         bool travellingFast = currentSpeed > recoverSpeedThreshold;
 
         float targetControl;
@@ -70,21 +77,18 @@ public class MagneticEnemyController : MonoBehaviour
 
         if (inMagnetRange)
         {
-            // Inside field: rapidly lose control
             targetControl = insideControl;
-            speed = controlLoseSpeed;
+            speed         = controlLoseSpeed;
         }
         else if (travellingFast)
         {
-            // Flung out and still moving fast: freeze control where it is
             targetControl = controlFactor;
-            speed = 0f;
+            speed         = 0f;
         }
         else
         {
-            // Slowed down enough: gradually recover control
             targetControl = 1f;
-            speed = controlRecoverSpeed;
+            speed         = controlRecoverSpeed;
         }
 
         controlFactor = Mathf.MoveTowards(
@@ -93,24 +97,90 @@ public class MagneticEnemyController : MonoBehaviour
             speed * Time.fixedDeltaTime
         );
 
-        // Movement
-        if (isGrounded)
+        if (isOnWall)
         {
+            WallMovement(controlFactor);
+        }
+        else if (isGrounded)
+        {
+            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
             GroundMovement(controlFactor);
         }
         else
         {
+            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
             AirMovement();
         }
 
         LimitSpeed();
     }
 
+    // ── Ground / Wall Detection ───────────────────────────────────
+
     void CheckGround()
     {
         Vector3 origin = transform.position + Vector3.up * 0.1f;
         isGrounded = Physics.Raycast(origin, Vector3.down, groundCheckDistance + 0.1f, groundLayer);
-        Debug.DrawRay(transform.position, Vector3.down * groundCheckDistance, isGrounded ? Color.green : Color.red);
+
+        Debug.DrawRay(origin, Vector3.down * groundCheckDistance,
+            isGrounded ? Color.green : Color.red);
+    }
+
+    void CheckWall()
+    {
+        Debug.Log("OnWall: " + isOnWall);
+        isOnWall   = false;
+        wallNormal = Vector3.zero;
+
+        float bestAngle = 0f;
+
+        // Directions to scan for walls
+        Vector3[] directions =
+        {
+            transform.forward,
+            -transform.forward,
+            transform.right,
+            -transform.right,
+            (transform.forward + transform.right).normalized,
+            (transform.forward - transform.right).normalized,
+            (-transform.forward + transform.right).normalized,
+            (-transform.forward - transform.right).normalized
+        };
+
+        foreach (var dir in directions)
+        {
+            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, wallCheckDistance, wallLayer))
+            {
+                Vector3 normal = hit.normal;
+
+                float angle = Vector3.Angle(normal, Vector3.up);
+
+                // Reject floor/ceiling
+                if (angle < wallDetectAngle || angle > 180f - wallDetectAngle)
+                    continue;
+
+                if (angle > bestAngle)
+                {
+                    bestAngle  = angle;
+                    wallNormal = normal;
+                }
+
+                Debug.DrawRay(hit.point, hit.normal, Color.blue);
+            }
+        }
+
+        if (wallNormal != Vector3.zero)
+        {
+            isOnWall = true;
+
+            wallSurfaceUp = Vector3.ProjectOnPlane(
+                (player.position - transform.position).normalized,
+                wallNormal
+            ).normalized;
+
+            Debug.DrawRay(transform.position, wallNormal, Color.cyan);
+            Debug.DrawRay(transform.position, wallSurfaceUp * 2f, Color.yellow);
+        }
     }
 
     bool IsInMagnetRange()
@@ -122,28 +192,36 @@ public class MagneticEnemyController : MonoBehaviour
         return dist <= magnet.range;
     }
 
+    // ── Movement ────────────────────────────────────────────
+
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Hit: " + collision.gameObject.name);
+        Debug.Log("Contact count: " + collision.contactCount);
+
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            Debug.DrawRay(contact.point, contact.normal, Color.red, 1f);
+        }
+    }
+
     void GroundMovement(float control)
     {
-        if (control < 0.01f)
-            return;
+        if (control < 0.01f) return;
 
         Vector3 toPlayer = (player.position - transform.position);
         toPlayer.y = 0f;
 
         if (toPlayer.magnitude < 0.1f) return;
 
-        Vector3 dir = toPlayer.normalized;
-
+        Vector3 dir             = toPlayer.normalized;
         Vector3 desiredVelocity = dir * maxSpeed;
-
-        Vector3 velocityChange = (desiredVelocity - rb.linearVelocity);
+        Vector3 velocityChange  = desiredVelocity - rb.linearVelocity;
         velocityChange.y = 0f;
 
-        Vector3 force = velocityChange * acceleration * control;
+        rb.AddForce(velocityChange * acceleration * control, ForceMode.Acceleration);
 
-        rb.AddForce(force, ForceMode.Acceleration);
-
-        if (control > 0.1f && dir != Vector3.zero)
+        if (control > 0.1f)
         {
             Quaternion targetRot = Quaternion.LookRotation(dir);
             transform.rotation = Quaternion.Slerp(
@@ -154,21 +232,43 @@ public class MagneticEnemyController : MonoBehaviour
         }
     }
 
+    void WallMovement(float control)
+    {
+        if (control < 0.01f) return;
+
+        Vector3 gravityOnWall = Vector3.down * extraGravity * wallGravityScale;
+        rb.AddForce(gravityOnWall, ForceMode.Acceleration);
+
+        rb.AddForce(-wallNormal * wallAttachForce, ForceMode.Acceleration);
+
+        Vector3 desiredVelocity = wallSurfaceUp * wallClimbSpeed;
+
+        Vector3 currentWallVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, wallNormal);
+        Vector3 velocityChange      = (desiredVelocity - currentWallVelocity) * acceleration * control;
+
+        rb.AddForce(velocityChange, ForceMode.Acceleration);
+
+        if (wallSurfaceUp != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(wallSurfaceUp, -wallNormal);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRot,
+                control * 8f * Time.fixedDeltaTime
+            );
+        }
+
+        Debug.DrawRay(transform.position, wallSurfaceUp * 2f, Color.yellow);
+    }
+
     void AirMovement()
     {
-        /*
-        Vector3 vel = rb.linearVelocity;
-        Vector3 horizontal = new Vector3(vel.x, 0f, vel.z);
-        horizontal *= (1f - airDrag * Time.fixedDeltaTime);
-        rb.linearVelocity = new Vector3(horizontal.x, vel.y, horizontal.z);
-        */
+        // Reserved for future air control
     }
 
     void LimitSpeed()
     {
-        // Only limit speed when enemy has meaningful control (prevents killing flings)
-        if (controlFactor < 0.5f)
-            return;
+        if (controlFactor < 0.5f) return;
 
         Vector3 horizontal = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
