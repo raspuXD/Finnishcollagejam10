@@ -21,6 +21,9 @@ public class PlayerController : MonoBehaviour
     public MagnetController magnetController;
     public UpgradeManager upgradeManager;
 
+    [Header("Keybinds")]
+    public KeyCode magnetToggleKey = KeyCode.Q;
+
     private Vector2 moveInput;
     private Rigidbody rb;
 
@@ -33,9 +36,15 @@ public class PlayerController : MonoBehaviour
         if (cameraTransform == null)
             cameraTransform = Camera.main.transform;
 
-        rb.linearDamping = drag;
-        rb.angularDamping = 0.5f;
+        rb.linearDamping   = drag;
+        rb.angularDamping  = 0.5f;
     }
+    /*
+    void Update()
+    {
+        if (Input.GetKeyDown(magnetToggleKey))
+            OnToggleMagnet();
+    }*/
 
     void FixedUpdate()
     {
@@ -80,7 +89,7 @@ public class PlayerController : MonoBehaviour
     {
         if (magnetController == null) return;
 
-        // Check if magnet toggle is unlocked
+        // Block if upgrade not purchased
         if (upgradeManager != null)
         {
             Upgrade toggleUpgrade = upgradeManager.GetUpgrade("magnet_toggle");

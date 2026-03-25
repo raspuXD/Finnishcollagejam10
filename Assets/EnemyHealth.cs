@@ -32,6 +32,7 @@ public class EnemyHealth : MonoBehaviour
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.RegisterKill(causeTag);
 
+        AudioManager.Instance.PlaySFX3D(causeTag, this.gameObject, 1f, 35f);
         Debug.Log(causeTag);
         onDeath?.Invoke(causeTag);
         Destroy(gameObject, 0.1f);

@@ -12,49 +12,56 @@ public class KillFeedUI : MonoBehaviour, IClosableUI
     [Header("Score Display")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI highscoreText;
-    public TextMeshProUGUI chainText;
     public TextMeshProUGUI levelText;
     public Image           xpBar;
+    public TextMeshProUGUI tokenText;
 
     [Header("Kill Feed")]
     public Transform       killFeedContainer;
-    public GameObject      killFeedEntryPrefab; // TextMeshProUGUI + CanvasGroup
+    public GameObject      killFeedEntryPrefab;
     public int             maxFeedEntries = 5;
     public float           entryLifetime  = 2.5f;
     public float           entryFadeTime  = 0.5f;
 
     [Header("Chain Display")]
-    public TextMeshProUGUI chainPopupText;
-    public float           chainPopupDuration = 1f;
-
-    [Header("Chain Colors")]
-    public Color baseChainColor  = Color.white;
-    public Color maxChainColor   = Color.red;
-    public int   maxChainDisplay = 10;
+    public GameObject      chainContainer;        // parent object to show/hide
+    public TextMeshProUGUI chainCountText;         // "x4 CHAIN"
+    public TextMeshProUGUI chainMultiplierText;    // "x2.5"
+    public Image           chainTimerBar;          // fill image for timer
+    public Color           chainBaseColor  = Color.white;
+    public Color           chainMaxColor   = Color.red;
+    public int             maxChainDisplay = 10;
 
     private Queue<GameObject> activeFeedEntries = new Queue<GameObject>();
-    private Coroutine chainPopupRoutine;
+    private float             chainTimeRemaining = 0f;
+    private bool              chainVisible       = false;
+
+    // ── IClosableUI ───────────────────────────────────────
     public void Hide() => gameObject.SetActive(false);
-    public void Show() => gameObject.SetActive(true);    void OnEnable()
+    public void Show() => gameObject.SetActive(true);
+
+    // ── Lifecycle ─────────────────────────────────────────
+
+    void OnEnable()
     {
         if (scoreManager == null) return;
-
         scoreManager.onScoreChanged.AddListener(UpdateScore);
         scoreManager.onChainUpdated.AddListener(UpdateChain);
         scoreManager.onXPChanged.AddListener(UpdateXP);
         scoreManager.onLevelUp.AddListener(UpdateLevel);
         scoreManager.onKill.AddListener(ShowKillFeedEntry);
+        scoreManager.onTokensChanged.AddListener(UpdateTokens);
     }
 
     void OnDisable()
     {
         if (scoreManager == null) return;
-
         scoreManager.onScoreChanged.RemoveListener(UpdateScore);
         scoreManager.onChainUpdated.RemoveListener(UpdateChain);
         scoreManager.onXPChanged.RemoveListener(UpdateXP);
         scoreManager.onLevelUp.RemoveListener(UpdateLevel);
         scoreManager.onKill.RemoveListener(ShowKillFeedEntry);
+        scoreManager.onTokensChanged.RemoveListener(UpdateTokens);
     }
 
     void Start()
@@ -65,12 +72,82 @@ public class KillFeedUI : MonoBehaviour, IClosableUI
         UpdateChain(scoreManager.ChainCount);
         UpdateXP(scoreManager.CurrentXP);
         UpdateLevel(scoreManager.CurrentLevel);
+        UpdateTokens(scoreManager.Tokens);
 
         if (highscoreText != null)
-            highscoreText.text = $"BEST: {scoreManager.HighScore}";
+            highscoreText.text = $"BEST: {scoreManager.HighScore:N0}";
+
+        // Hide chain display initially
+        if (chainContainer != null)
+            chainContainer.SetActive(false);
     }
 
-    // ── Listeners ──────────────────────────────────────────
+    void Update()
+    {
+        if (!chainVisible) return;
+
+        chainTimeRemaining -= Time.deltaTime;
+
+        if (chainTimerBar != null)
+        {
+            float fill = Mathf.Clamp01(chainTimeRemaining / scoreManager.chainWindow);
+            chainTimerBar.fillAmount = fill;
+            chainTimerBar.color      = Color.Lerp(Color.red, Color.green, fill);
+        }
+
+        if (chainTimeRemaining <= 0f)
+            HideChain();
+    }
+
+    // ── Chain ─────────────────────────────────────────────
+
+    void UpdateChain(int chain)
+    {
+        if (chain <= 0)
+        {
+            HideChain();
+            return;
+        }
+
+        chainVisible       = true;
+        chainTimeRemaining = scoreManager.chainWindow;
+
+        if (chainContainer != null)
+            chainContainer.SetActive(true);
+
+        // Color ramp
+        float t     = Mathf.Clamp01((float)chain / maxChainDisplay);
+        Color color = Color.Lerp(chainBaseColor, chainMaxColor, t);
+
+        if (chainCountText != null)
+        {
+            chainCountText.text  = $"x{chain} CHAIN";
+            chainCountText.color = color;
+        }
+
+        // Multiplier = 1 + chain * chainMultiplier from ScoreManager
+        if (chainMultiplierText != null)
+        {
+            float mult = 1f + chain * scoreManager.chainMultiplier;
+            chainMultiplierText.text  = $"{mult:F1}x";
+            chainMultiplierText.color = color;
+        }
+
+        if (chainTimerBar != null)
+        {
+            chainTimerBar.fillAmount = 1f;
+            chainTimerBar.color      = color;
+        }
+    }
+
+    void HideChain()
+    {
+        chainVisible = false;
+        if (chainContainer != null)
+            chainContainer.SetActive(false);
+    }
+
+    // ── Score / XP / Tokens ───────────────────────────────
 
     void UpdateScore(int score)
     {
@@ -78,24 +155,7 @@ public class KillFeedUI : MonoBehaviour, IClosableUI
             scoreText.text = score.ToString("N0");
 
         if (highscoreText != null)
-            highscoreText.text = $"BEST HIGHSCORE: {scoreManager.HighScore:N0}";
-    }
-
-    void UpdateChain(int chain)
-    {
-        if (chainText == null) return;
-
-        if (chain <= 1)
-        {
-            chainText.gameObject.SetActive(false);
-            return;
-        }
-
-        chainText.gameObject.SetActive(true);
-
-        float t = Mathf.Clamp01((float)chain / maxChainDisplay);
-        chainText.color = Color.Lerp(baseChainColor, maxChainColor, t);
-        chainText.text  = $"x{chain} CHAIN";
+            highscoreText.text = $"BEST: {scoreManager.HighScore:N0}";
     }
 
     void UpdateXP(int xp)
@@ -110,20 +170,28 @@ public class KillFeedUI : MonoBehaviour, IClosableUI
             levelText.text = $"LVL {level}";
     }
 
+    void UpdateTokens(int tokens)
+    {
+        if (tokenText != null)
+            tokenText.text = $"Tokens: {tokens}";
+    }
+
+    // ── Kill Feed ─────────────────────────────────────────
+
     void ShowKillFeedEntry(string displayName, int points, int chain)
     {
         if (killFeedContainer == null || killFeedEntryPrefab == null) return;
 
-        // Trim oldest if over limit
         while (activeFeedEntries.Count >= maxFeedEntries)
         {
             GameObject old = activeFeedEntries.Dequeue();
             if (old != null) Destroy(old);
         }
 
-        GameObject entry  = Instantiate(killFeedEntryPrefab, killFeedContainer);
-        TextMeshProUGUI t = entry.GetComponentInChildren<TextMeshProUGUI>();
+        GameObject entry = Instantiate(killFeedEntryPrefab, killFeedContainer);
+        entry.transform.SetAsLastSibling();
 
+        TextMeshProUGUI t = entry.GetComponentInChildren<TextMeshProUGUI>();
         if (t != null)
         {
             string chainSuffix = chain > 1 ? $" <color=#FFD700>x{chain}</color>" : "";

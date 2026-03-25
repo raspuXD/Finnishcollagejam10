@@ -286,6 +286,7 @@ GameObject:
   - component: {fileID: 8929082214460092433}
   - component: {fileID: 1416486937702844307}
   - component: {fileID: 5064200460423750109}
+  - component: {fileID: 4809789494057353738}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -398,6 +399,22 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4809789494057353738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3835056964070841088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2939656b9f56eb54eac4dc395d9786b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverButton
+  desiredScale: 1.25
+  scaleSpeed: 10
+  buttonText: {fileID: 1168825759425978583}
+  wantTheTextToBeCool: 1
 --- !u!1 &5528865511323701336
 GameObject:
   m_ObjectHideFlags: 0

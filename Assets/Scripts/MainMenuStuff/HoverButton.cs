@@ -53,6 +53,6 @@ public class HoverButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     void Update()
     {
         Vector3 target = hovering ? targetScale : originalScale;
-        transform.localScale = Vector3.Lerp(transform.localScale, target, Time.deltaTime * scaleSpeed);
+        transform.localScale = Vector3.Lerp(transform.localScale, target, Time.unscaledDeltaTime * scaleSpeed);
     }
 }

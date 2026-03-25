@@ -198,8 +198,12 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        GameObject obj = target != null ? target : gameObject;
-        AudioSource source = obj.AddComponent<AudioSource>();
+        Vector3 position = target != null ? target.transform.position : Vector3.zero;
+
+        GameObject tempGO = new GameObject("3D_SFX");
+        tempGO.transform.position = position;
+
+        AudioSource source = tempGO.AddComponent<AudioSource>();
 
         source.clip = s.clip;
         source.volume = sfxSource.volume;
@@ -213,7 +217,8 @@ public class AudioManager : MonoBehaviour
             : 1f;
 
         source.Play();
-        Destroy(source, s.clip.length / source.pitch);
+
+        Destroy(tempGO, s.clip.length / source.pitch);
     }
 
     public void PlayUIButton()
