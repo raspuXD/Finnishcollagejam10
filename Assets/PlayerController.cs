@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 moveInput;
     private Rigidbody rb;
+    [Header("Magnetism")]
+    public MagnetPolarity polarity = MagnetPolarity.Repel;
 
     void Awake()
     {
