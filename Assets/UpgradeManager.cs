@@ -32,9 +32,6 @@ public class UpgradeManager : MonoBehaviour
     public MagnetController magnetController;
     public ScoreManager     scoreManager;
 
-    [Header("Regen")]
-    public float regenTickRate = 1f;
-
     [Header("Upgrade Menu UI")]
     public GameObject upgradeMenuRoot;
     public Transform  upgradeButtonContainer;
@@ -56,7 +53,6 @@ public class UpgradeManager : MonoBehaviour
     };
 
     private bool menuOpen = false;
-    private Coroutine regenRoutine;
     private List<GameObject> spawnedButtons = new List<GameObject>();
 
     void Awake()
@@ -69,7 +65,6 @@ public class UpgradeManager : MonoBehaviour
     {
         //LoadUpgrades();
         ApplyAll();
-        StartRegenLoop();
 
         if (upgradeMenuRoot != null)
             upgradeMenuRoot.SetActive(false);
@@ -203,7 +198,8 @@ public class UpgradeManager : MonoBehaviour
                 break;
 
             case "health_regen":
-                StartRegenLoop();
+                if (playerHealth != null)
+                    playerHealth.regenRate = u.CurrentValue;
                 break;
 
             case "move_speed":
@@ -239,29 +235,6 @@ public class UpgradeManager : MonoBehaviour
             case "magnet_toggle":
                 // unlocked — PlayerController checks this before allowing toggle
                 break;
-        }
-    }
-
-    // ── Regen ──────────────────────────────────────────────────────
-
-    void StartRegenLoop()
-    {
-        if (regenRoutine != null)
-            StopCoroutine(regenRoutine);
-
-        Upgrade regen = GetUpgrade("health_regen");
-        if (regen == null || regen.currentLevel == 0) return;
-
-        regenRoutine = StartCoroutine(RegenTick(regen));
-    }
-
-    IEnumerator RegenTick(Upgrade regen)
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(regenTickRate);
-            if (playerHealth != null)
-                playerHealth.Heal(regen.CurrentValue);
         }
     }
 

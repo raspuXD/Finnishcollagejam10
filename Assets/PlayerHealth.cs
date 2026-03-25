@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -7,22 +8,52 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float currentHealth;
 
     [Header("Regen")]
-    public float regenDelay = 3f;  // seconds after last hit before regen resumes
-    private float lastHitTime = -999f;
-    public bool CanRegen => Time.time >= lastHitTime + regenDelay;
+    public float regenDelay    = 3f;
+    public float regenRate     = 0f;
+    public float regenTickRate = 1f;
 
-    public UnityEvent<float> onHealthChanged;
+    private float lastHitTime = -999f;
+    private bool  isDead      = false;
+
+    public bool CanRegen => Time.time >= lastHitTime + regenDelay && regenRate > 0f;
+
+    public UnityEvent<float>  onHealthChanged;
     public UnityEvent<string> onDeath;
+    public UnityEvent<float>  OnHeal;
 
     void Awake()
     {
         currentHealth = maxHealth;
     }
 
+    void Start()
+    {
+        StartCoroutine(RegenLoop());
+    }
+
+    IEnumerator RegenLoop()
+    {
+        while (!isDead)
+        {
+            yield return new WaitForSeconds(regenTickRate);
+
+            // Skip if dead, full health, or buffer active
+            if (isDead) yield break;
+            if (!CanRegen) continue;
+            if (currentHealth >= maxHealth) continue;
+
+            currentHealth = Mathf.Min(currentHealth + regenRate * regenTickRate, maxHealth);
+            OnHeal?.Invoke(GetHealthNormalized());
+            onHealthChanged?.Invoke(GetHealthNormalized());
+        }
+    }
+
     public void TakeDamage(float damage, string causeTag = "Unknown")
     {
-        currentHealth  = Mathf.Max(currentHealth - damage, 0f);
-        lastHitTime    = Time.time;  // reset regen buffer on every hit
+        if (isDead) return;
+
+        currentHealth = Mathf.Max(currentHealth - damage, 0f);
+        lastHitTime   = Time.time;
 
         onHealthChanged?.Invoke(GetHealthNormalized());
 
@@ -32,7 +63,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void Heal(float amount)
     {
-        if (!CanRegen) return;  // blocked until buffer expires
+        if (isDead) return;
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         onHealthChanged?.Invoke(GetHealthNormalized());
@@ -48,6 +79,7 @@ public class PlayerHealth : MonoBehaviour
 
     void Die(string causeTag)
     {
+        isDead = true;
         onDeath?.Invoke(causeTag);
     }
 

@@ -47,10 +47,15 @@ public class MagnetController : MonoBehaviour
                 playerController.controlMultiplier = 1f;
             return;
         }
-
+        
         ApplyMagnetism();
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(this.gameObject.transform.position, range);
+    }
     // ── Toggle ─────────────────────────────────────────────────────
 
     public void TurnOn()
@@ -131,6 +136,7 @@ public class MagnetController : MonoBehaviour
     void ApplyMagnetism()
     {
         Collider[] hits    = Physics.OverlapSphere(transform.position, range);
+        
         bool magnetActive  = false;
 
         foreach (Collider hit in hits)

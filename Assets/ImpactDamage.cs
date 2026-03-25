@@ -77,7 +77,7 @@ public class ImpactDamage : MonoBehaviour
             case HitStrength.Small:
                 if (!AudioManager.Instance.IsSFXOnCooldown("SmallHit", smallHitSoundCooldown))
                 {
-                    AudioManager.Instance.PlaySFX3D("SmallHit", this.gameObject, 5f, 20f);
+                    AudioManager.Instance.PlaySFX3D("SmallHit", this.gameObject, 1f, 35f);
                     AudioManager.Instance.RegisterSFXPlayed("SmallHit");
                 }
                 lastHitTime = Time.time + smallHitSoundCooldown;
@@ -87,7 +87,7 @@ public class ImpactDamage : MonoBehaviour
             case HitStrength.Medium:
                 if (!AudioManager.Instance.IsSFXOnCooldown("MediumHit", mediumHitSoundCooldown))
                 {
-                    AudioManager.Instance.PlaySFX3D("MediumHit", this.gameObject, 5f, 20f);
+                    AudioManager.Instance.PlaySFX3D("MediumHit", this.gameObject, 1f, 35f);
                     AudioManager.Instance.RegisterSFXPlayed("MediumHit");
                 }
                 lastHitTime = Time.time + mediumHitSoundCooldown;
@@ -97,7 +97,7 @@ public class ImpactDamage : MonoBehaviour
             case HitStrength.Big:
                 if (!AudioManager.Instance.IsSFXOnCooldown("BigHit", bigHitSoundCooldown))
                 {
-                    AudioManager.Instance.PlaySFX3D("BigHit", this.gameObject, 5f, 25f);
+                    AudioManager.Instance.PlaySFX3D("BigHit", this.gameObject, 1f, 35f);
                     AudioManager.Instance.RegisterSFXPlayed("BigHit");
                 }
                 lastHitTime = Time.time + bigHitSoundCooldown;

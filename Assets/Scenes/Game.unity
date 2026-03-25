@@ -863,6 +863,74 @@ MonoBehaviour:
   scaleSpeed: 10
   buttonText: {fileID: 1367790348}
   wantTheTextToBeCool: 1
+--- !u!1 &459520983
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 459520985}
+  - component: {fileID: 459520984}
+  - component: {fileID: 459520986}
+  m_Layer: 0
+  m_Name: PostProcessing_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &459520984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459520983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 2ce9f65f1f8116d43b1230d5b74e34c6, type: 2}
+--- !u!4 &459520985
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459520983}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 943.63635, y: 713.0022, z: -494.51984}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &459520986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459520983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e94f094e7ecff894fabec1726b792be1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RegenVFX
+  playerHealth: {fileID: 5740807261132676989}
+  postProcessVolume: {fileID: 459520984}
+  pulseIntensity: 0.4
+  pulseInTime: 0.1
+  pulseOutTime: 0.4
+  idleIntensity: 0.15
 --- !u!1 &498674638
 GameObject:
   m_ObjectHideFlags: 0
@@ -2235,7 +2303,7 @@ MonoBehaviour:
   maxPitch: 72.7
   distance: 7.5
   height: 2.17
-  followSmoothness: 14.88
+  followSmoothness: 15
 --- !u!114 &1108525753
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3267,7 +3335,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -112.9}
+  m_AnchoredPosition: {x: 0, y: -125}
   m_SizeDelta: {x: 1000, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1753756015
@@ -3290,7 +3358,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: HIGH SCORE
+  m_text: 'BEST HIGHSCORE: 25555555555555555555555555555555555555555555555'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3317,10 +3385,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 115
+  m_fontSize: 38.1
   m_fontSizeBase: 115
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -3356,7 +3424,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 0, w: -110.35596}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3505,7 +3573,6 @@ MonoBehaviour:
   playerHealth: {fileID: 5740807261132676989}
   magnetController: {fileID: 5740807261132676984}
   scoreManager: {fileID: 1775761720}
-  regenTickRate: 1
   upgradeMenuRoot: {fileID: 606910361}
   upgradeButtonContainer: {fileID: 367378576}
   upgradeButtonPrefab: {fileID: 3835056964070841088, guid: 13d5fb9a7e58c51468570f591bedcbdd, type: 3}
@@ -4644,6 +4711,8 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   regenDelay: 4
+  regenRate: 0
+  regenTickRate: 1
   onHealthChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -4673,6 +4742,33 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1775761722}
+        m_TargetAssemblyTypeName: MouseUnlock, Assembly-CSharp
+        m_MethodName: UnlockMouse
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnHeal:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 459520983}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &5740807261132676990
 MonoBehaviour:
@@ -4814,3 +4910,4 @@ SceneRoots:
   - {fileID: 1497876926}
   - {fileID: 869020471}
   - {fileID: 203959624}
+  - {fileID: 459520985}
