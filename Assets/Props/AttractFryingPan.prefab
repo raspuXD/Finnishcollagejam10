@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5430041138588889342}
   - component: {fileID: 2414324326895113991}
   - component: {fileID: -1457339599789340261}
+  - component: {fileID: 200283628094026979}
   m_Layer: 0
   m_Name: AttractFryingPan
   m_TagString: Prop
@@ -195,3 +196,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExtraGravity
   extraGravity: 3
+  fallMultiplier: 2.5
+  riseMultiplier: 1.2
+--- !u!114 &200283628094026979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2268103063955537110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc27e0cc328aec04c87a3a86e0239293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PropTimer
+  lifetime: 60

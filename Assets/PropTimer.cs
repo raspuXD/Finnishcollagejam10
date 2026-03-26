@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PropTimer : MonoBehaviour
 {
-    public float lifetime = 10f;
+    public float lifetime = 60f;
     private float spawnTime;
 
     void Start()

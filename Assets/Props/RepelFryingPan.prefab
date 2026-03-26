@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6419718295607513263}
   - component: {fileID: 6133438039657636009}
   - component: {fileID: -9012612678911104566}
+  - component: {fileID: -4339331473110765578}
   m_Layer: 0
   m_Name: RepelFryingPan
   m_TagString: Prop
@@ -195,3 +196,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExtraGravity
   extraGravity: 3
+  fallMultiplier: 2.5
+  riseMultiplier: 1.2
+--- !u!114 &-4339331473110765578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2939000710668987289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc27e0cc328aec04c87a3a86e0239293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PropTimer
+  lifetime: 60

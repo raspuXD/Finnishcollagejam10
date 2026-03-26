@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4520465343341363592}
   - component: {fileID: 7090010727152166850}
   - component: {fileID: 8979358408639485759}
+  - component: {fileID: 4101751977417992539}
   m_Layer: 0
   m_Name: AttractSword
   m_TagString: Prop
@@ -195,3 +196,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExtraGravity
   extraGravity: 15
+  fallMultiplier: 2.5
+  riseMultiplier: 1.2
+--- !u!114 &4101751977417992539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8780692915146700660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc27e0cc328aec04c87a3a86e0239293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PropTimer
+  lifetime: 60

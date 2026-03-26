@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4522611119930257673}
   - component: {fileID: 4175848022059025168}
   - component: {fileID: -4498268495596726890}
+  - component: {fileID: -1784731369092829795}
   m_Layer: 0
   m_Name: NoPolarityFryingPan
   m_TagString: Prop
@@ -195,3 +196,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExtraGravity
   extraGravity: 3
+  fallMultiplier: 2.5
+  riseMultiplier: 1.2
+--- !u!114 &-1784731369092829795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7468191261414035045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc27e0cc328aec04c87a3a86e0239293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PropTimer
+  lifetime: 60

@@ -72,6 +72,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7db4486b442d5a94ebfde27c11c3e071, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7711053515586176476}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7db4486b442d5a94ebfde27c11c3e071, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6654559595503244546}
   m_SourcePrefab: {fileID: 100100000, guid: 7db4486b442d5a94ebfde27c11c3e071, type: 3}
 --- !u!1 &4192544050582533408 stripped
 GameObject:
@@ -157,3 +160,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExtraGravity
   extraGravity: 5
+  fallMultiplier: 2.5
+  riseMultiplier: 1.2
+--- !u!114 &6654559595503244546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4192544050582533408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc27e0cc328aec04c87a3a86e0239293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PropTimer
+  lifetime: 60
