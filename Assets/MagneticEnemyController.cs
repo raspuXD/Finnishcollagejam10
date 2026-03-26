@@ -6,7 +6,7 @@ public class MagneticEnemyController : MonoBehaviour
 {
     [Header("Target")]
     public Transform player;
-
+    
     private MagnetController magnet;
 
     [Header("Movement")]
@@ -28,6 +28,7 @@ public class MagneticEnemyController : MonoBehaviour
     public float recoverSpeedThreshold = 4f;
 
     [Header("Wall Climbing")]
+    [SerializeField]private bool wasOnWall;
     public float wallCheckDistance    = 0.8f;
     public float wallClimbSpeed       = 4f;
     public float wallGravityScale     = 0.1f;
@@ -40,6 +41,9 @@ public class MagneticEnemyController : MonoBehaviour
     private bool  isOnWall;
     private Vector3 wallNormal;
     private Vector3 wallSurfaceUp;
+
+    // Track this at the top of the class
+    
 
     private float controlFactor = 1f;
 
@@ -97,6 +101,12 @@ public class MagneticEnemyController : MonoBehaviour
             speed * Time.fixedDeltaTime
         );
 
+        // Push off the wall the moment the ray stops detecting it
+        if (wasOnWall && !isOnWall)
+            rb.AddForce(wallNormal * wallAttachForce, ForceMode.Impulse);
+
+        wasOnWall = isOnWall;
+
         if (isOnWall)
         {
             WallMovement(controlFactor);
@@ -128,58 +138,32 @@ public class MagneticEnemyController : MonoBehaviour
 
     void CheckWall()
     {
-        Debug.Log("OnWall: " + isOnWall);
         isOnWall   = false;
         wallNormal = Vector3.zero;
 
-        float bestAngle = 0f;
+        Vector3 toPlayer = (player.position - transform.position).normalized;
 
-        // Directions to scan for walls
-        Vector3[] directions =
-        {
-            transform.forward,
-            -transform.forward,
-            transform.right,
-            -transform.right,
-            (transform.forward + transform.right).normalized,
-            (transform.forward - transform.right).normalized,
-            (-transform.forward + transform.right).normalized,
-            (-transform.forward - transform.right).normalized
-        };
-
-        foreach (var dir in directions)
-        {
-            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, wallCheckDistance, wallLayer))
-            {
-                Vector3 normal = hit.normal;
-
-                float angle = Vector3.Angle(normal, Vector3.up);
-
-                // Reject floor/ceiling
-                if (angle < wallDetectAngle || angle > 180f - wallDetectAngle)
-                    continue;
-
-                if (angle > bestAngle)
-                {
-                    bestAngle  = angle;
-                    wallNormal = normal;
-                }
-
-                Debug.DrawRay(hit.point, hit.normal, Color.blue);
-            }
-        }
-
+        // Push origin slightly away from the wall using last known normal
+        Vector3 origin = transform.position;
         if (wallNormal != Vector3.zero)
+            origin += wallNormal * 0.15f;
+
+        Debug.DrawRay(origin, toPlayer * wallCheckDistance, Color.white);
+
+        if (Physics.Raycast(origin, toPlayer, out RaycastHit hit, wallCheckDistance, wallLayer))
         {
-            isOnWall = true;
+            float angle = Vector3.Angle(hit.normal, Vector3.up);
 
-            wallSurfaceUp = Vector3.ProjectOnPlane(
-                (player.position - transform.position).normalized,
-                wallNormal
-            ).normalized;
+            if (angle >= wallDetectAngle && angle <= 180f - wallDetectAngle)
+            {
+                wallNormal    = hit.normal;
+                isOnWall      = true;
+                wallSurfaceUp = Vector3.ProjectOnPlane(toPlayer, wallNormal).normalized;
 
-            Debug.DrawRay(transform.position, wallNormal, Color.cyan);
-            Debug.DrawRay(transform.position, wallSurfaceUp * 2f, Color.yellow);
+                Debug.DrawRay(hit.point,  hit.normal,         Color.blue);
+                Debug.DrawRay(origin,     wallNormal,         Color.cyan);
+                Debug.DrawRay(origin,     wallSurfaceUp * 2f, Color.yellow);
+            }
         }
     }
 
@@ -239,10 +223,11 @@ public class MagneticEnemyController : MonoBehaviour
         Vector3 gravityOnWall = Vector3.down * extraGravity * wallGravityScale;
         rb.AddForce(gravityOnWall, ForceMode.Acceleration);
 
-        rb.AddForce(-wallNormal * wallAttachForce, ForceMode.Acceleration);
+        // Only stick to the wall if we have enough control, not when freshly thrown
+        if (control > 0.5f)
+            rb.AddForce(-wallNormal * wallAttachForce, ForceMode.Acceleration);
 
-        Vector3 desiredVelocity = wallSurfaceUp * wallClimbSpeed;
-
+        Vector3 desiredVelocity     = wallSurfaceUp * wallClimbSpeed;
         Vector3 currentWallVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, wallNormal);
         Vector3 velocityChange      = (desiredVelocity - currentWallVelocity) * acceleration * control;
 
@@ -257,8 +242,6 @@ public class MagneticEnemyController : MonoBehaviour
                 control * 8f * Time.fixedDeltaTime
             );
         }
-
-        Debug.DrawRay(transform.position, wallSurfaceUp * 2f, Color.yellow);
     }
 
     void AirMovement()
