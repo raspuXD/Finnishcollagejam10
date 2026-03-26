@@ -5,7 +5,7 @@ using System;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public float maxHealth = 100f;
+    public float maxHealth = 500f;
     [SerializeField] private float currentHealth;
 
     [Header("Regen")]
@@ -46,6 +46,8 @@ public class PlayerHealth : MonoBehaviour
             if (!CanRegen) continue;
             if (currentHealth >= maxHealth) continue;
 
+
+            AudioManager.Instance.PlaySFX("Heal");
             currentHealth = Mathf.Min(currentHealth + regenRate * regenTickRate, maxHealth);
             UpdateHealthBar();
             OnHeal?.Invoke(GetHealthNormalized());
@@ -56,6 +58,7 @@ public class PlayerHealth : MonoBehaviour
     public void UpdateHealthBar()
     {
         healthBar.UpdateHealthBar(maxHealth, currentHealth);
+        
     }
 
     public void TakeDamage(float damage, string causeTag = "Unknown")
@@ -69,6 +72,7 @@ public class PlayerHealth : MonoBehaviour
         onHealthChanged?.Invoke(GetHealthNormalized());
 
         UpdateHealthBar();
+        AudioManager.Instance.PlaySFX("TookDamage");
 
         if (currentHealth <= 0f)
             Die(causeTag);
@@ -78,7 +82,10 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDead) return;
 
+
+        AudioManager.Instance.PlaySFX("Heal");
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        
         onHealthChanged?.Invoke(GetHealthNormalized());
         UpdateHealthBar();
     }

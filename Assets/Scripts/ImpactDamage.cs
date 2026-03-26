@@ -97,7 +97,7 @@ public class ImpactDamage : MonoBehaviour
             case HitStrength.Big:
                 if (!AudioManager.Instance.IsSFXOnCooldown("BigHit", bigHitSoundCooldown))
                 {
-                    AudioManager.Instance.PlaySFX3D("BigHit", this.gameObject, 1f, 35f);
+                    AudioManager.Instance.PlaySFX3D("BigHit", this.gameObject, 1f, 100f);
                     AudioManager.Instance.RegisterSFXPlayed("BigHit");
                 }
                 lastHitTime = Time.time + bigHitSoundCooldown;

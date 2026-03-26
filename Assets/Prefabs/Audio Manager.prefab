@@ -64,6 +64,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: b78ee14eda8da0a48b0b7f8bf7625b8b, type: 3}
     useRandomPitch: 1
     pitchRange: {x: 0.8, y: 1}
+  - name: EnemyFootstep
+    clip: {fileID: 8300000, guid: 276ed9c2022c0cb4db5f08935046f54d, type: 3}
+    useRandomPitch: 1
+    pitchRange: {x: 0.8, y: 1}
   uiButtonSounds:
   - {fileID: 8300000, guid: 53c73537429e9ba408dcd6d6340e9a99, type: 3}
   musicSource: {fileID: 3004012427389493719}

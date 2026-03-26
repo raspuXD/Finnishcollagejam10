@@ -211,3 +211,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PropTimer
   lifetime: 60
+  SoundEffect: Sword

@@ -252,6 +252,11 @@ MonoBehaviour:
   extraGravity: 5
   fallMultiplier: 2.5
   riseMultiplier: 1.2
+  footstepSFXName: EnemyFootstep
+  footstepCooldown: 0.5
+  footstepMinSpeed: 0.5
+  sfxMinRange: 1
+  sfxMaxRange: 15
   groundCheckDistance: 1.2
   groundLayer:
     serializedVersion: 2

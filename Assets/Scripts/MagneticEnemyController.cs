@@ -15,6 +15,14 @@ public class MagneticEnemyController : MonoBehaviour
     public float extraGravity = 10f;
     public float fallMultiplier = 2.5f;
     public float riseMultiplier = 1.2f;
+    
+    [Header("SFX")]
+    [SerializeField] string footstepSFXName = "EnemyFootstep";
+    [SerializeField] float footstepCooldown = 0.35f;
+    [SerializeField] float footstepMinSpeed = 0.5f;   // ignore tiny wobbles
+    [SerializeField] float sfxMinRange = 1f;
+    [SerializeField] float sfxMaxRange = 15f;
+
 
     [Header("Ground Check")]
     public float groundCheckDistance = 1.2f;
@@ -220,6 +228,15 @@ public class MagneticEnemyController : MonoBehaviour
                 targetRot,
                 control * 10f * Time.fixedDeltaTime
             );
+        }
+        // Footstep SFX
+        float horizontalSpeed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+
+        if (horizontalSpeed > footstepMinSpeed
+            && !AudioManager.Instance.IsSFXOnCooldown(footstepSFXName, footstepCooldown))
+        {
+            AudioManager.Instance.PlaySFX3D(footstepSFXName, gameObject, sfxMinRange, sfxMaxRange);
+            AudioManager.Instance.RegisterSFXPlayed(footstepSFXName);
         }
     }
 

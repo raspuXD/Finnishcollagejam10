@@ -93,6 +93,15 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             ""id"": ""4d0f4bfd-a61a-4943-96c3-a97d47b36be9"",
             ""actions"": [
                 {
+                    ""name"": ""LookAction"",
+                    ""type"": ""Value"",
+                    ""id"": ""fb6c7c9c-4721-49fe-bfcf-3ff9f6845b38"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""0cb320b1-e743-4e8e-8320-76cf403368fa"",
@@ -407,6 +416,61 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""dbd160a6-468d-4147-b3d8-21adb77eacf7"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookAction"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""46b061e8-2747-4d0d-8953-f2f7c618ca65"",
+                    ""path"": ""<Gamepad>/rightStick/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookAction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""a60be470-d7da-4e82-b1f4-e400472db618"",
+                    ""path"": ""<Gamepad>/rightStick/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookAction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""31f1ebb5-c0eb-44d8-a946-72a5dff70747"",
+                    ""path"": ""<Gamepad>/rightStick/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookAction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""85c0efd8-63a1-4f4c-9706-4b94f96bf737"",
+                    ""path"": ""<Gamepad>/rightStick/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LookAction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -415,6 +479,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
 }");
         // Movement
         m_Movement = asset.FindActionMap("Movement", throwIfNotFound: true);
+        m_Movement_LookAction = m_Movement.FindAction("LookAction", throwIfNotFound: true);
         m_Movement_Move = m_Movement.FindAction("Move", throwIfNotFound: true);
         m_Movement_Sprint = m_Movement.FindAction("Sprint", throwIfNotFound: true);
         m_Movement_Jump = m_Movement.FindAction("Jump", throwIfNotFound: true);
@@ -503,6 +568,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     // Movement
     private readonly InputActionMap m_Movement;
     private List<IMovementActions> m_MovementActionsCallbackInterfaces = new List<IMovementActions>();
+    private readonly InputAction m_Movement_LookAction;
     private readonly InputAction m_Movement_Move;
     private readonly InputAction m_Movement_Sprint;
     private readonly InputAction m_Movement_Jump;
@@ -522,6 +588,10 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
         public MovementActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Movement/LookAction".
+        /// </summary>
+        public InputAction @LookAction => m_Wrapper.m_Movement_LookAction;
         /// <summary>
         /// Provides access to the underlying input action "Movement/Move".
         /// </summary>
@@ -580,6 +650,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_MovementActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_MovementActionsCallbackInterfaces.Add(instance);
+            @LookAction.started += instance.OnLookAction;
+            @LookAction.performed += instance.OnLookAction;
+            @LookAction.canceled += instance.OnLookAction;
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
@@ -615,6 +688,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="MovementActions" />
         private void UnregisterCallbacks(IMovementActions instance)
         {
+            @LookAction.started -= instance.OnLookAction;
+            @LookAction.performed -= instance.OnLookAction;
+            @LookAction.canceled -= instance.OnLookAction;
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
@@ -679,6 +755,13 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     /// <seealso cref="MovementActions.RemoveCallbacks(IMovementActions)" />
     public interface IMovementActions
     {
+        /// <summary>
+        /// Method invoked when associated input action "LookAction" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLookAction(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Move" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
