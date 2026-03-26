@@ -199,6 +199,9 @@ MonoBehaviour:
   - tag: Spike
     minVelocity: 1
     damageMultiplier: 10
+  - tag: DeathPit
+    minVelocity: 0
+    damageMultiplier: 10000
 --- !u!114 &55205842586465243
 MonoBehaviour:
   m_ObjectHideFlags: 0
