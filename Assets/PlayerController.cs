@@ -49,6 +49,10 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Restore drag once velocity settles
+        if (rb.linearDamping == 0f && rb.linearVelocity.magnitude < moveSpeed * 1.5f)
+            rb.linearDamping = drag;
+
         Move();
         rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
     }
@@ -60,7 +64,6 @@ public class PlayerController : MonoBehaviour
 
         forward.y = 0;
         right.y   = 0;
-
         forward.Normalize();
         right.Normalize();
 
@@ -68,13 +71,17 @@ public class PlayerController : MonoBehaviour
 
         float currentSpeed     = isSprinting ? moveSpeed + sprintSpeedBonus : moveSpeed;
         Vector3 targetVelocity = move * currentSpeed;
-        Vector3 velocity       = rb.linearVelocity;
-        Vector3 velocityChange = targetVelocity - new Vector3(velocity.x, 0, velocity.z);
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        // Don't brake if we're moving faster than our own max speed (e.g. launched)
+        if (horizontalVelocity.magnitude > currentSpeed && move.magnitude < 0.1f)
+            return;
+
+        Vector3 velocityChange = targetVelocity - horizontalVelocity;
 
         if (controlMultiplier > 0.05f)
             rb.AddForce(velocityChange * acceleration * controlMultiplier, ForceMode.Acceleration);
     }
-
     public void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();

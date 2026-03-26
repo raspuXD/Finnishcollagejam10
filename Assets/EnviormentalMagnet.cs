@@ -118,12 +118,14 @@ public class EnvironmentalMagnet : MonoBehaviour
     {
         Vector3 dir = (playerRb.position - transform.position).normalized;
 
-        float finalForce = launchForce;
-
         playerRb.linearVelocity = Vector3.zero;
-        playerRb.AddForce(dir * finalForce, ForceMode.Impulse);
+        playerRb.linearDamping  = 0f;  // kill drag so the launch carries
+        playerRb.AddForce(dir * launchForce, ForceMode.Impulse);
 
-        Debug.Log("LAUNCH FORCE USED: " + finalForce);
+        lastLaunchTime    = Time.time;
+        launchDisableUntil = Time.time + launchDisableTime;
+
+        Debug.Log("LAUNCH FORCE USED: " + launchForce);
     }
 
     void FixedUpdate()
