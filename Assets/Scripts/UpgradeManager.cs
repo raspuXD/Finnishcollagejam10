@@ -32,6 +32,9 @@ public class UpgradeManager : MonoBehaviour
     public MagnetController magnetController;
     public ScoreManager     scoreManager;
 
+    [Header("Input")]
+    public InputActionReference toggleUpgradeMenuAction;
+
     [Header("Upgrade Menu UI")]
     public GameObject upgradeMenuRoot;
     public Transform  upgradeButtonContainer;
@@ -61,6 +64,24 @@ public class UpgradeManager : MonoBehaviour
         Instance = this;
     }
 
+    void OnEnable()
+    {
+        if (toggleUpgradeMenuAction != null)
+        {
+            toggleUpgradeMenuAction.action.Enable();
+            toggleUpgradeMenuAction.action.performed += OnToggleUpgradeMenu;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (toggleUpgradeMenuAction != null)
+        {
+            toggleUpgradeMenuAction.action.performed -= OnToggleUpgradeMenu;
+            toggleUpgradeMenuAction.action.Disable();
+        }
+    }
+
     void Start()
     {
         //LoadUpgrades();
@@ -68,29 +89,24 @@ public class UpgradeManager : MonoBehaviour
 
         if (upgradeMenuRoot != null)
             upgradeMenuRoot.SetActive(false);
-        if(upgradeMenuRoot == null)
-        {
-            Debug.Log("UPGRADE MENY NULL");
-        }
+        else
+            Debug.Log("UPGRADE MENU NULL");
+    }
+
+    // ── Input Callback ─────────────────────────────────────────────
+
+    private void OnToggleUpgradeMenu(InputAction.CallbackContext context)
+    {
+        ToggleUpgradeMenu();
     }
 
     // ── Menu ───────────────────────────────────────────────────────
-
-    public void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.B))
-        {
-            ToggleUpgradeMenu();
-        }
-    }
 
     public void ToggleUpgradeMenu()
     {
         menuOpen = !menuOpen;
         upgradeMenuRoot.SetActive(menuOpen);
 
-        
-        // Pause / unpause time
         Time.timeScale = menuOpen ? 0f : 1f;
 
         Cursor.lockState = menuOpen ? CursorLockMode.None : CursorLockMode.Locked;
@@ -102,22 +118,18 @@ public class UpgradeManager : MonoBehaviour
 
     void RefreshUI()
     {
-        // Clear old buttons
         foreach (var b in spawnedButtons)
             if (b != null) Destroy(b);
         spawnedButtons.Clear();
 
-        // Token count
         if (tokenCountText != null && scoreManager != null)
             tokenCountText.text = $"Tokens: {scoreManager.Tokens}";
 
-        // Spawn one button per upgrade
         foreach (var upgrade in upgrades)
         {
             GameObject entry = Instantiate(upgradeButtonPrefab, upgradeButtonContainer);
             spawnedButtons.Add(entry);
 
-            // Find text fields by name — set up your prefab with these child names
             TextMeshProUGUI nameText  = entry.transform.Find("NameText") ?.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI descText  = entry.transform.Find("DescText") ?.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI levelText = entry.transform.Find("LevelText")?.GetComponent<TextMeshProUGUI>();
@@ -142,7 +154,7 @@ public class UpgradeManager : MonoBehaviour
                 button.onClick.AddListener(() =>
                 {
                     TryPurchase(capturedId);
-                    RefreshUI(); // refresh after purchase
+                    RefreshUI();
                 });
             }
         }
@@ -203,12 +215,12 @@ public class UpgradeManager : MonoBehaviour
                 break;
 
             case "move_speed":
-            if (playerController != null)
-            {
-                playerController.moveSpeed        = u.CurrentValue;         // +2 per level
-                playerController.sprintSpeedBonus = 5f + u.currentLevel * 4f; // 5 base + 4 per level
-            }
-            break;
+                if (playerController != null)
+                {
+                    playerController.moveSpeed        = u.CurrentValue;
+                    playerController.sprintSpeedBonus = 5f + u.currentLevel * 4f;
+                }
+                break;
 
             case "acceleration":
                 if (playerController != null)
@@ -236,7 +248,6 @@ public class UpgradeManager : MonoBehaviour
                 break;
 
             case "magnet_toggle":
-                // unlocked — PlayerController checks this before allowing toggle
                 break;
         }
     }

@@ -311,6 +311,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a7bcc8b0-f1b5-4bda-ba39-4a43b183f294",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleUpgradeMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "7893e5f2-9961-4d0c-b6e9-4cf48a4fbc54",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
