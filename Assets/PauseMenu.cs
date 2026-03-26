@@ -11,6 +11,7 @@ public class PauseMenu : MonoBehaviour
     [Header("References")]
     [SerializeField] GameObject pauseMenuPanel;
     [SerializeField] GameObject GameMenuPanel;
+    public GameObject pauseMenu;
 
     [Header("Input")]
     // Expects an InputActionReference wired to your "Pause" action
@@ -50,6 +51,10 @@ public class PauseMenu : MonoBehaviour
 
     public void Pause()
     {
+        if(pauseMenu.activeSelf)
+        {
+            return;
+        }
         _isPaused = true;
         pauseMenuPanel.SetActive(true);
         GameMenuPanel.SetActive(false);

@@ -57,6 +57,7 @@ public class UpgradeManager : MonoBehaviour
 
     private bool menuOpen = false;
     private List<GameObject> spawnedButtons = new List<GameObject>();
+    public GameObject pauseMenu;
 
     void Awake()
     {
@@ -104,6 +105,10 @@ public class UpgradeManager : MonoBehaviour
 
     public void ToggleUpgradeMenu()
     {
+        if (pauseMenu.activeSelf)
+        {
+            return;
+        }
         menuOpen = !menuOpen;
         upgradeMenuRoot.SetActive(menuOpen);
 
