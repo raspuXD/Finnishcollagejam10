@@ -165,7 +165,7 @@ public class MagnetController : MonoBehaviour
                 if (metal.objectType == MetalObject.ObjectType.Prop)
                 {
                     // PROPS: same polarity attracts
-                    attract = currentPolarity == metal.polarity;
+                    attract = currentPolarity != metal.polarity;
                 }
                 else // Enemy
                 {

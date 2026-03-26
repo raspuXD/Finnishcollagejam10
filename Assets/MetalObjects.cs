@@ -38,13 +38,12 @@ public class MetalObject : MonoBehaviour
 
     void UpdateShader()
     {
+        if (rend == null) return;
+
         rend.GetPropertyBlock(mpb);
 
-        // Polarity value (-1 or +1)
         float polarityValue = polarity == MagnetPolarity.Attract ? -1f : 1f;
-
-        // Tint strength ONLY when polarity is used
-        float tint = usePolarity ? 0.3f : 0f;
+        float tint = usePolarity ? 0.4f : 0.0f;
 
         mpb.SetFloat("_Polarity", polarityValue);
         mpb.SetFloat("_TintStrength", tint);
@@ -70,31 +69,31 @@ public class MetalObject : MonoBehaviour
 
             Vector3 dir = toOther.normalized;
 
+            // Skip if polarity system disabled
             if (!usePolarity || !other.usePolarity)
-                continue;
+            continue;
 
-            bool attract;
-
-            if (objectType == ObjectType.Prop || other.objectType == ObjectType.Prop)
-                attract = polarity == other.polarity;
-            else
-                attract = polarity != other.polarity;
+            // YOUR INTENDED LOGIC:
+            // same polarity = repel
+            // different polarity = attract
+            bool attract = polarity != other.polarity;
 
             Vector3 forceDir = attract ? dir : -dir;
 
+            // Strength balancing
             float total = magneticStrength + other.magneticStrength;
-
             float thisFactor = other.magneticStrength / total;
-            float otherFactor = magneticStrength / total;
 
+            // Smooth falloff
             float distance01 = Mathf.Clamp01(distance / range);
             float falloff = 1f - distance01;
             falloff *= falloff;
 
             float force = 50f * falloff;
+            Debug.Log($"{name} ({polarity}) vs {other.name} ({other.polarity}) => attract: {attract}");
 
+            // APPLY FORCE ONLY TO THIS OBJECT (FIX)
             rb.AddForce(forceDir * force * thisFactor, ForceMode.Acceleration);
-            other.rb.AddForce(-forceDir * force * otherFactor, ForceMode.Acceleration);
         }
     }
 }
