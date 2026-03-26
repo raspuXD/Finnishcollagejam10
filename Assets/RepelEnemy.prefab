@@ -201,7 +201,7 @@ MonoBehaviour:
     damageMultiplier: 10
   - tag: DeathPit
     minVelocity: 0
-    damageMultiplier: 10000
+    damageMultiplier: 100000
 --- !u!114 &1504478934130855265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -250,6 +250,8 @@ MonoBehaviour:
   maxSpeed: 20
   acceleration: 8
   extraGravity: 5
+  fallMultiplier: 2.5
+  riseMultiplier: 1.2
   groundCheckDistance: 1.2
   groundLayer:
     serializedVersion: 2

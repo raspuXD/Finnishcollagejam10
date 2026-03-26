@@ -32,6 +32,7 @@ public class ScoreManager : MonoBehaviour
         new KillTypeScore { causeTag = "Floor",   basePoints = 100, displayName = "Floor Slam!"  },
         new KillTypeScore { causeTag = "Prop",    basePoints = 200, displayName = "Prop Kill!"   },
         new KillTypeScore { causeTag = "Enemy",   basePoints = 50,  displayName = "Basic Kill"   },
+        new KillTypeScore { causeTag = "DeathPit",basePoints = 75,  displayName = "Pit Kill!"   },
         new KillTypeScore { causeTag = "Unknown", basePoints = 50,  displayName = "Kill"         },
     };
 

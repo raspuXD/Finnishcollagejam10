@@ -6,13 +6,15 @@ public class MagneticEnemyController : MonoBehaviour
 {
     [Header("Target")]
     public Transform player;
-    
+
     private MagnetController magnet;
 
     [Header("Movement")]
     public float maxSpeed     = 6f;
     public float acceleration = 8f;
     public float extraGravity = 10f;
+    public float fallMultiplier = 2.5f;
+    public float riseMultiplier = 1.2f;
 
     [Header("Ground Check")]
     public float groundCheckDistance = 1.2f;
@@ -22,28 +24,25 @@ public class MagneticEnemyController : MonoBehaviour
     public float airDrag = 0.2f;
 
     [Header("Magnetic Control")]
-    public float insideControl        = 0.05f;
-    public float controlLoseSpeed     = 10f;
-    public float controlRecoverSpeed  = 0.5f;
+    public float insideControl         = 0.05f;
+    public float controlLoseSpeed      = 10f;
+    public float controlRecoverSpeed   = 0.5f;
     public float recoverSpeedThreshold = 4f;
 
     [Header("Wall Climbing")]
-    [SerializeField]private bool wasOnWall;
-    public float wallCheckDistance    = 0.8f;
-    public float wallClimbSpeed       = 4f;
-    public float wallGravityScale     = 0.1f;
-    public float wallAttachForce      = 15f;
-    public float wallDetectAngle      = 60f;
+    [SerializeField] private bool wasOnWall;
+    public float wallCheckDistance = 0.8f;
+    public float wallClimbSpeed    = 4f;
+    public float wallGravityScale  = 0.1f;
+    public float wallAttachForce   = 15f;
+    public float wallDetectAngle   = 60f;
     public LayerMask wallLayer;
 
     private Rigidbody rb;
-    private bool  isGrounded;
-    private bool  isOnWall;
+    private bool    isGrounded;
+    private bool    isOnWall;
     private Vector3 wallNormal;
     private Vector3 wallSurfaceUp;
-
-    // Track this at the top of the class
-    
 
     private float controlFactor = 1f;
 
@@ -72,9 +71,9 @@ public class MagneticEnemyController : MonoBehaviour
         CheckGround();
         CheckWall();
 
-        bool inMagnetRange  = IsInMagnetRange();
-        float currentSpeed  = rb.linearVelocity.magnitude;
-        bool travellingFast = currentSpeed > recoverSpeedThreshold;
+        bool  inMagnetRange  = IsInMagnetRange();
+        float currentSpeed   = rb.linearVelocity.magnitude;
+        bool  travellingFast = currentSpeed > recoverSpeedThreshold;
 
         float targetControl;
         float speed;
@@ -101,7 +100,6 @@ public class MagneticEnemyController : MonoBehaviour
             speed * Time.fixedDeltaTime
         );
 
-        // Push off the wall the moment the ray stops detecting it
         if (wasOnWall && !isOnWall)
             rb.AddForce(wallNormal * wallAttachForce, ForceMode.Impulse);
 
@@ -113,16 +111,28 @@ public class MagneticEnemyController : MonoBehaviour
         }
         else if (isGrounded)
         {
-            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
+            ApplyGravity();
             GroundMovement(controlFactor);
         }
         else
         {
-            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
+            ApplyGravity();
             AirMovement();
         }
 
         LimitSpeed();
+    }
+
+    // ── Gravity ───────────────────────────────────────────────────
+
+    void ApplyGravity()
+    {
+        if (rb.linearVelocity.y < 0f)
+            rb.AddForce(Vector3.down * extraGravity * fallMultiplier, ForceMode.Acceleration);
+        else if (rb.linearVelocity.y > 0f)
+            rb.AddForce(Vector3.down * extraGravity * riseMultiplier, ForceMode.Acceleration);
+        else
+            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
     }
 
     // ── Ground / Wall Detection ───────────────────────────────────
@@ -143,7 +153,6 @@ public class MagneticEnemyController : MonoBehaviour
 
         Vector3 toPlayer = (player.position - transform.position).normalized;
 
-        // Push origin slightly away from the wall using last known normal
         Vector3 origin = transform.position;
         if (wallNormal != Vector3.zero)
             origin += wallNormal * 0.15f;
@@ -160,9 +169,9 @@ public class MagneticEnemyController : MonoBehaviour
                 isOnWall      = true;
                 wallSurfaceUp = Vector3.ProjectOnPlane(toPlayer, wallNormal).normalized;
 
-                Debug.DrawRay(hit.point,  hit.normal,         Color.blue);
-                Debug.DrawRay(origin,     wallNormal,         Color.cyan);
-                Debug.DrawRay(origin,     wallSurfaceUp * 2f, Color.yellow);
+                Debug.DrawRay(hit.point, hit.normal,          Color.blue);
+                Debug.DrawRay(origin,    wallNormal,           Color.cyan);
+                Debug.DrawRay(origin,    wallSurfaceUp * 2f,   Color.yellow);
             }
         }
     }
@@ -176,7 +185,7 @@ public class MagneticEnemyController : MonoBehaviour
         return dist <= magnet.range;
     }
 
-    // ── Movement ────────────────────────────────────────────
+    // ── Movement ──────────────────────────────────────────────────
 
     void OnCollisionEnter(Collision collision)
     {
@@ -220,10 +229,10 @@ public class MagneticEnemyController : MonoBehaviour
     {
         if (control < 0.01f) return;
 
+        // Wall uses its own reduced gravity, no fall/rise multiplier
         Vector3 gravityOnWall = Vector3.down * extraGravity * wallGravityScale;
         rb.AddForce(gravityOnWall, ForceMode.Acceleration);
 
-        // Only stick to the wall if we have enough control, not when freshly thrown
         if (control > 0.5f)
             rb.AddForce(-wallNormal * wallAttachForce, ForceMode.Acceleration);
 
@@ -242,6 +251,8 @@ public class MagneticEnemyController : MonoBehaviour
                 control * 8f * Time.fixedDeltaTime
             );
         }
+
+        Debug.DrawRay(transform.position, wallSurfaceUp * 2f, Color.yellow);
     }
 
     void AirMovement()
@@ -257,7 +268,7 @@ public class MagneticEnemyController : MonoBehaviour
 
         if (horizontal.magnitude > maxSpeed)
         {
-            horizontal = horizontal.normalized * maxSpeed;
+            horizontal        = horizontal.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(horizontal.x, rb.linearVelocity.y, horizontal.z);
         }
     }

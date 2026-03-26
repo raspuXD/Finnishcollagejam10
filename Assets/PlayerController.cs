@@ -11,7 +11,12 @@ public class PlayerController : MonoBehaviour
     private int CurrentJumps;
 
     public float drag = 1f;
-    public float extraGravity = 20f;
+
+    [Header("Gravity")]
+    public float extraGravity   = 20f;
+    public float fallMultiplier = 2.5f;
+    public float riseMultiplier = 1.2f;
+
 
     [HideInInspector] public float controlMultiplier = 1f;
 
@@ -48,13 +53,22 @@ public class PlayerController : MonoBehaviour
     }
 
     void FixedUpdate()
-    {
-        // Restore drag once velocity settles
-        if (rb.linearDamping == 0f && rb.linearVelocity.magnitude < moveSpeed * 1.5f)
-            rb.linearDamping = drag;
+{
+    if (rb.linearDamping == 0f && rb.linearVelocity.magnitude < moveSpeed * 1.5f)
+        rb.linearDamping = drag;
 
-        Move();
-        rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
+    Move();
+    ApplyGravity();
+}
+
+    void ApplyGravity()
+    {
+        if (rb.linearVelocity.y < 0f)
+            rb.AddForce(Vector3.down * extraGravity * fallMultiplier, ForceMode.Acceleration);
+        else if (rb.linearVelocity.y > 0f)
+            rb.AddForce(Vector3.down * extraGravity * riseMultiplier, ForceMode.Acceleration);
+        else
+            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
     }
 
     void Move()
