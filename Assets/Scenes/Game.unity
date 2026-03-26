@@ -3485,10 +3485,6 @@ PrefabInstance:
       propertyPath: sfxSounds.Array.data[10].pitchRange.y
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 7441325117574721733, guid: 532d926ed141494409c4a408d773060a, type: 3}
-      propertyPath: sfxSounds.Array.data[3].useRandomPitch
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
