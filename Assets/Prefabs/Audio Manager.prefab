@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   musicSounds:
   - name: Theme
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 806764dbee747f04d9bb96e2d62fa8ff, type: 3}
     useRandomPitch: 0
     pitchRange: {x: 0, y: 0}
   sfxSounds:
@@ -111,7 +111,7 @@ AudioSource:
   m_GameObject: {fileID: 4328614615329211164}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 4010118003451714804, guid: 7eb39c4b06a25de4e8a44cd987064223, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -240,7 +240,7 @@ AudioSource:
   m_GameObject: {fileID: 5713846605487663969}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 5469279710321346399, guid: 7eb39c4b06a25de4e8a44cd987064223, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0

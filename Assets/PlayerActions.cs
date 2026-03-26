@@ -154,6 +154,15 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""69c26fc4-4e98-490f-b63b-c514830e0e85"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -376,6 +385,28 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""ToggleUpgradeMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7893e5f2-9961-4d0c-b6e9-4cf48a4fbc54"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4acf13bb-9a0f-4051-a0c8-e632674f99c7"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -391,6 +422,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Movement_Repel = m_Movement.FindAction("Repel", throwIfNotFound: true);
         m_Movement_ToggleMagnet = m_Movement.FindAction("ToggleMagnet", throwIfNotFound: true);
         m_Movement_ToggleUpgradeMenu = m_Movement.FindAction("ToggleUpgradeMenu", throwIfNotFound: true);
+        m_Movement_Pause = m_Movement.FindAction("Pause", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -478,6 +510,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Movement_Repel;
     private readonly InputAction m_Movement_ToggleMagnet;
     private readonly InputAction m_Movement_ToggleUpgradeMenu;
+    private readonly InputAction m_Movement_Pause;
     /// <summary>
     /// Provides access to input actions defined in input action map "Movement".
     /// </summary>
@@ -517,6 +550,10 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Movement/ToggleUpgradeMenu".
         /// </summary>
         public InputAction @ToggleUpgradeMenu => m_Wrapper.m_Movement_ToggleUpgradeMenu;
+        /// <summary>
+        /// Provides access to the underlying input action "Movement/Pause".
+        /// </summary>
+        public InputAction @Pause => m_Wrapper.m_Movement_Pause;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -564,6 +601,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @ToggleUpgradeMenu.started += instance.OnToggleUpgradeMenu;
             @ToggleUpgradeMenu.performed += instance.OnToggleUpgradeMenu;
             @ToggleUpgradeMenu.canceled += instance.OnToggleUpgradeMenu;
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
         }
 
         /// <summary>
@@ -596,6 +636,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @ToggleUpgradeMenu.started -= instance.OnToggleUpgradeMenu;
             @ToggleUpgradeMenu.performed -= instance.OnToggleUpgradeMenu;
             @ToggleUpgradeMenu.canceled -= instance.OnToggleUpgradeMenu;
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
         }
 
         /// <summary>
@@ -685,5 +728,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleUpgradeMenu(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPause(InputAction.CallbackContext context);
     }
 }

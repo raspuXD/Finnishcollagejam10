@@ -31,15 +31,15 @@ public class VolumeControl : MonoBehaviour
         float holeroVolume = theSlider.value * 100f;
         if(isMusic)
         {
-            theText.text = "MUSIC VOLUME: " + holeroVolume.ToString("F0") + "%";
+            theText.text = "MUSIC VOLUME:" + holeroVolume.ToString("F0") + "%";
         }
         else if(isSFX)
         {
-            theText.text = "SFX VOLUME: " + holeroVolume.ToString("F0") + "%";
+            theText.text = "SFX VOLUME:" + holeroVolume.ToString("F0") + "%";
         }
         else
         {
-            theText.text = "MASTER VOLUME: " + holeroVolume.ToString("F0") + "%";
+            theText.text = "MASTER VOLUME:" + holeroVolume.ToString("F0") + "%";
         }
     }
 
