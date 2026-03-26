@@ -189,8 +189,6 @@ public class MagneticEnemyController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Hit: " + collision.gameObject.name);
-        Debug.Log("Contact count: " + collision.contactCount);
 
         foreach (ContactPoint contact in collision.contacts)
         {

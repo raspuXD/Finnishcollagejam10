@@ -19,6 +19,9 @@ public class ArenaSpawner : MonoBehaviour
         public GameObject noPolarityPrefab;
         public GameObject attractPrefab;
         public GameObject repelPrefab;
+
+        public bool MetallicObject;
+
         [Range(0f, 1f)] public float spawnWeight = 1f; // relative chance of this variant being picked
     }
 
@@ -104,6 +107,8 @@ public class ArenaSpawner : MonoBehaviour
         bool usePolarity;
         MagnetPolarity polarity = MagnetPolarity.Attract;
 
+    
+
         if (roll < noPolarityChance)
         {
             prefab = enemyNoPolarityPrefab;
@@ -165,7 +170,14 @@ public class ArenaSpawner : MonoBehaviour
         float roll = Random.value;
         GameObject prefab;
         MagnetPolarity polarity;
+        bool SKIGITY;
 
+
+        if(SKIGITY = variant.MetallicObject)
+        {
+            prefab = variant.noPolarityPrefab;
+            polarity = MagnetPolarity.Attract; // doesn't matter, polarity disabled
+        }
         if (roll < noPolarityChance)
         {
             prefab = variant.noPolarityPrefab;
@@ -181,6 +193,9 @@ public class ArenaSpawner : MonoBehaviour
             prefab = variant.repelPrefab;
             polarity = MagnetPolarity.Repel;
         }
+        
+        
+        
 
         // Fallback: if a specific variant prefab isn't assigned, try others
         prefab ??= variant.attractPrefab ?? variant.repelPrefab ?? variant.noPolarityPrefab;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
+using System;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -21,9 +22,12 @@ public class PlayerHealth : MonoBehaviour
     public UnityEvent<string> onDeath;
     public UnityEvent<float>  OnHeal;
 
+    [SerializeField] private HealthBar healthBar;
+
     void Awake()
     {
         currentHealth = maxHealth;
+        healthBar.UpdateHealthBar(maxHealth, currentHealth);
     }
 
     void Start()
@@ -43,19 +47,28 @@ public class PlayerHealth : MonoBehaviour
             if (currentHealth >= maxHealth) continue;
 
             currentHealth = Mathf.Min(currentHealth + regenRate * regenTickRate, maxHealth);
+            UpdateHealthBar();
             OnHeal?.Invoke(GetHealthNormalized());
             onHealthChanged?.Invoke(GetHealthNormalized());
         }
     }
 
+    public void UpdateHealthBar()
+    {
+        healthBar.UpdateHealthBar(maxHealth, currentHealth);
+    }
+
     public void TakeDamage(float damage, string causeTag = "Unknown")
     {
         if (isDead) return;
+        
 
         currentHealth = Mathf.Max(currentHealth - damage, 0f);
         lastHitTime   = Time.time;
 
         onHealthChanged?.Invoke(GetHealthNormalized());
+
+        UpdateHealthBar();
 
         if (currentHealth <= 0f)
             Die(causeTag);
@@ -67,6 +80,7 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         onHealthChanged?.Invoke(GetHealthNormalized());
+        UpdateHealthBar();
     }
 
     public void SetMaxHealth(float newMax)
@@ -75,6 +89,7 @@ public class PlayerHealth : MonoBehaviour
         maxHealth     = newMax;
         currentHealth = maxHealth * ratio;
         onHealthChanged?.Invoke(GetHealthNormalized());
+        UpdateHealthBar();
     }
 
     void Die(string causeTag)

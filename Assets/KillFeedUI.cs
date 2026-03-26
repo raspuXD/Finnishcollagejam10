@@ -12,6 +12,7 @@ public class KillFeedUI : MonoBehaviour, IClosableUI
     [Header("Score Display")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI highscoreText;
+    public TextMeshProUGUI deathCauseText;
     public TextMeshProUGUI levelText;
     public Image           xpBar;
     public TextMeshProUGUI tokenText;
@@ -96,56 +97,130 @@ public class KillFeedUI : MonoBehaviour, IClosableUI
         }
 
         if (chainTimeRemaining <= 0f)
-            HideChain();
+            StartFadeOutChain(); // was HideChain()
     }
+
+    // Player Death
+    string FormatDeathCause(string causeTag)
+    {
+        switch (causeTag)
+        {
+            case "Spikes":   return "Killed by Spikes";
+            case "Pit":      return "Fell into a Pit";
+            case "Enemy":    return "Killed by an Enemy";
+            case "Prop":     return "Crushed by a Prop";
+            case "Wall":     return "Wall Slammed";
+            case "Floor":    return "Floor Slammed";
+            default:         return $"Killed by {causeTag}";
+        }
+    }
+    // Call this from PlayerHealth.onDeath event
+    public void GetPlayerDeath(string causeTag)
+    {
+        if (deathCauseText != null)
+            deathCauseText.text = FormatDeathCause(causeTag);
+    }
+
+    
 
     // ── Chain ─────────────────────────────────────────────
 
-    void UpdateChain(int chain)
+    // ── Chain ─────────────────────────────────────────────
+
+void UpdateChain(int chain)
+{
+    if (chain <= 0)
     {
-        if (chain <= 0)
-        {
-            HideChain();
-            return;
-        }
-
-        chainVisible       = true;
-        chainTimeRemaining = scoreManager.chainWindow;
-
-        if (chainContainer != null)
-            chainContainer.SetActive(true);
-
-        // Color ramp
-        float t     = Mathf.Clamp01((float)chain / maxChainDisplay);
-        Color color = Color.Lerp(chainBaseColor, chainMaxColor, t);
-
-        if (chainCountText != null)
-        {
-            chainCountText.text  = $"x{chain} CHAIN";
-            chainCountText.color = color;
-        }
-
-        // Multiplier = 1 + chain * chainMultiplier from ScoreManager
-        if (chainMultiplierText != null)
-        {
-            float mult = 1f + chain * scoreManager.chainMultiplier;
-            chainMultiplierText.text  = $"{mult:F1}x";
-            chainMultiplierText.color = color;
-        }
-
-        if (chainTimerBar != null)
-        {
-            chainTimerBar.fillAmount = 1f;
-            chainTimerBar.color      = color;
-        }
+        StartFadeOutChain();
+        return;
     }
 
-    void HideChain()
+    // Cancel any ongoing fade if a new kill comes in
+    if (chainFadeCoroutine != null)
     {
-        chainVisible = false;
-        if (chainContainer != null)
-            chainContainer.SetActive(false);
+        StopCoroutine(chainFadeCoroutine);
+        chainFadeCoroutine = null;
     }
+
+    chainVisible       = true;
+    chainTimeRemaining = scoreManager.chainWindow;
+
+    if (chainContainer != null)
+    {
+        chainContainer.SetActive(true);
+        // Make sure alpha is fully visible
+        CanvasGroup cg = chainContainer.GetComponent<CanvasGroup>();
+        if (cg == null) cg = chainContainer.AddComponent<CanvasGroup>();
+        cg.alpha = 1f;
+    }
+
+    float t     = Mathf.Clamp01((float)chain / maxChainDisplay);
+    Color color = Color.Lerp(chainBaseColor, chainMaxColor, t);
+
+    if (chainCountText != null)
+    {
+        chainCountText.text  = $"x{chain} CHAIN";
+        chainCountText.color = color;
+    }
+
+    if (chainMultiplierText != null)
+    {
+        float mult = 1f + chain * scoreManager.chainMultiplier;
+        chainMultiplierText.text  = $"{mult:F1}x";
+        chainMultiplierText.color = color;
+    }
+
+    if (chainTimerBar != null)
+    {
+        chainTimerBar.fillAmount = 1f;
+        chainTimerBar.color      = color;
+    }
+}
+
+private Coroutine chainFadeCoroutine = null;
+
+void StartFadeOutChain()
+{
+    if (!chainVisible) return;
+    chainVisible       = false;
+    chainTimeRemaining = 0f;
+
+    if (chainContainer != null)
+    {
+        if (chainFadeCoroutine != null) StopCoroutine(chainFadeCoroutine);
+        chainFadeCoroutine = StartCoroutine(FadeOutChain(entryFadeTime));
+    }
+}
+
+IEnumerator FadeOutChain(float fadeTime)
+{
+    CanvasGroup cg = chainContainer.GetComponent<CanvasGroup>();
+    if (cg == null) cg = chainContainer.AddComponent<CanvasGroup>();
+
+    float t = 0f;
+    while (t < fadeTime)
+    {
+        cg.alpha = Mathf.Lerp(1f, 0f, t / fadeTime);
+        t += Time.deltaTime;
+        yield return null;
+    }
+
+    cg.alpha = 0f;
+    chainContainer.SetActive(false);
+    chainFadeCoroutine = null;
+}
+
+void HideChain()
+{
+    chainVisible       = false;
+    chainTimeRemaining = 0f;
+    if (chainContainer != null)
+    {
+        CanvasGroup cg = chainContainer.GetComponent<CanvasGroup>();
+        if (cg != null) cg.alpha = 1f; // reset for next time
+        chainContainer.SetActive(false);
+    }
+}
 
     // ── Score / XP / Tokens ───────────────────────────────
 

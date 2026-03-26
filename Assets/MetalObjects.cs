@@ -90,7 +90,6 @@ public class MetalObject : MonoBehaviour
             falloff *= falloff;
 
             float force = 50f * falloff;
-            Debug.Log($"{name} ({polarity}) vs {other.name} ({other.polarity}) => attract: {attract}");
 
             // APPLY FORCE ONLY TO THIS OBJECT (FIX)
             rb.AddForce(forceDir * force * thisFactor, ForceMode.Acceleration);
