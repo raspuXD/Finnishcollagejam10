@@ -53,21 +53,49 @@ MonoBehaviour:
     pitchRange: {x: 0, y: 0}
   sfxSounds:
   - name: SmallHit
-    clip: {fileID: 8300000, guid: df8d81b38f39dcd409451a8bb5726eec, type: 3}
+    clip: {fileID: 8300000, guid: 0a951cc7ee789654a8dd42224d8dd99f, type: 3}
     useRandomPitch: 1
-    pitchRange: {x: 0.8, y: 1}
+    pitchRange: {x: 0.9, y: 1}
   - name: MediumHit
-    clip: {fileID: 8300000, guid: 825aa255b79a25b499316d9d9773e88b, type: 3}
+    clip: {fileID: 8300000, guid: 422a2ed87fdd0094bb4f22a12a3b4a08, type: 3}
     useRandomPitch: 1
-    pitchRange: {x: 0.8, y: 1.2}
+    pitchRange: {x: 0.9, y: 1}
   - name: BigHit
-    clip: {fileID: 8300000, guid: b78ee14eda8da0a48b0b7f8bf7625b8b, type: 3}
+    clip: {fileID: 8300000, guid: 5b93c9937a996c64999e26c5d43da2c4, type: 3}
     useRandomPitch: 1
-    pitchRange: {x: 0.8, y: 1}
+    pitchRange: {x: 0.9, y: 1}
   - name: EnemyFootstep
-    clip: {fileID: 8300000, guid: 276ed9c2022c0cb4db5f08935046f54d, type: 3}
+    clip: {fileID: 8300000, guid: bf2fa0f130c6e3c40943dc48845d9562, type: 3}
     useRandomPitch: 1
-    pitchRange: {x: 0.8, y: 1}
+    pitchRange: {x: 0.9, y: 1}
+  - name: DeathPit
+    clip: {fileID: 8300000, guid: 6c73bbd8cbfbc3f4e99783300cc290b7, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
+  - name: TookDamage
+    clip: {fileID: 8300000, guid: d5e42aa7ad17e554c82621c6a8d222ff, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
+  - name: Heal
+    clip: {fileID: 8300000, guid: 2da47bb6f415b7344b9c69b052445a14, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
+  - name: Trash
+    clip: {fileID: 8300000, guid: e6048344ad33ebb4bb8ea80c1d51f69c, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
+  - name: Pan
+    clip: {fileID: 8300000, guid: 7f9b3f4a10b0f014e8a2117fb27d6ff3, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
+  - name: Brick
+    clip: {fileID: 8300000, guid: 9e6fcb6187d97644b8dc875c56e010cc, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
+  - name: Sword
+    clip: {fileID: 8300000, guid: fab130e626fc0374a9601dd614287b08, type: 3}
+    useRandomPitch: 0
+    pitchRange: {x: 1, y: 1}
   uiButtonSounds:
   - {fileID: 8300000, guid: 53c73537429e9ba408dcd6d6340e9a99, type: 3}
   musicSource: {fileID: 3004012427389493719}
