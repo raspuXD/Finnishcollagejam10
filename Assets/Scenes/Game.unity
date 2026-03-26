@@ -2036,22 +2036,22 @@ MonoBehaviour:
   m_FillRect: {fileID: 49401818}
   m_HandleRect: {fileID: 2023165845}
   m_Direction: 0
-  m_MinValue: 50
-  m_MaxValue: 5000
+  m_MinValue: 1
+  m_MaxValue: 2000
   m_WholeNumbers: 0
-  m_Value: 5000
+  m_Value: 2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1108525752}
         m_TargetAssemblyTypeName: ThirdPersonCamera, Assembly-CSharp
         m_MethodName: SetSensitivity
-        m_Mode: 4
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 0
+          m_FloatArgument: 1
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
@@ -6129,7 +6129,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThirdPersonCamera
   target: {fileID: 5740807261132676983}
   pivot: {fileID: 576429365}
-  sensitivity: 1000
+  lookAction: {fileID: -1981520624930706909, guid: e052b3d8aac237041b8e419fed57dc6c, type: 3}
+  sensitivity: 5000
+  minSensitivity: 1
   minPitch: -58.2
   maxPitch: 72.7
   distance: 8.5
